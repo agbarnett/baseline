@@ -46,6 +46,9 @@ shinyUI(fluidPage(
         )
     ),
     
+    # to do, report basic statistics about the table
+    # cat("The table had x rows with x continuous statistics and y percentage statistics.')
+    
     # footnotes
     mainPanel(
         p(" \n"),

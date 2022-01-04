@@ -43,10 +43,18 @@ shinyServer(function(input, output) {
     inFile <- input$excel.file
     if (is.null(inFile)==TRUE){text = NULL} # if no file
     if (is.null(inFile)==FALSE){
-      results = run_bayes_test(in_data = tstats())
+      
+      # progress message & run model
+      withProgress(message = 'Running Bayesian model',
+                   detail = 'This may take a few minutes...', value = 0,{
+                     results = run_bayes_test(in_data = tstats())
+                     incProgress(1)
+                   })
+      
+      # extract stats
       mult = results$mult
       text = paste('The probability that the trial has an issue is ', results$p.flag, '.\n',
-                   "The multiplier is ", round(mult$mean,2), ", 95% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ".", sep='')
+                   "The multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ".", sep='')
       
     }
     

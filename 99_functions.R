@@ -171,8 +171,8 @@ t.stats.percents = function(indata){
 }
 
 
-## function to run Bayesian model
-run_bayes_test = function(in_data,
+## function to run Bayesian model (winbugs version)
+run_bayes_test_winbugs = function(in_data,
                     MCMC = 1000,
                     thin = 3,
                     n.chains = 2,
@@ -221,6 +221,78 @@ run_bayes_test = function(in_data,
   return(to.return)
 } # end of function
 
+
+## function to run Bayesian model (nimble version)
+run_bayes_test = function(in_data,
+                          MCMC = 1000,
+                          thin = 3
+){
+
+  # prepare the data for nimble
+  N = nrow(in_data) # number of statistics
+  N_studies = length(unique(in_data$study)) # number of studies
+  constants = list(N = N, N_studies = N_studies)
+  #
+  data = list(mdiff = in_data$mdiff,
+              inv.sem2 = 1 / in_data$sem2, # inverse-variance
+              df = in_data$size - 1, # degrees of freedom
+              study = in_data$study)
+  
+  ## initial values
+  mu.var = matrix(data=NA, ncol=2, nrow=N_studies) # start with NA
+  mu.var[,2] = 0.1 # small positive
+  #
+  inits = list(mu.var = mu.var, 
+               var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
+  
+  # model
+  baselineCode <- nimbleCode({
+    # Model
+    for(i in 1:N){
+      mdiff[i] ~ dt(0, tau[i], df[i])
+      tau[i] <- inv.sem2[i] * inv.var[study[i]] # precision
+    }
+    
+    # Priors
+    for(j in 1:N_studies){
+      # spike-slab for inverse-variance
+      log(inv.var[j]) <- mu.var[j, pick[j]]
+      pick[j] <- var.flag[j] + 1
+      var.flag[j] ~ dbern(0.5) # 
+      mu.var[j,1] <- 0 # spike at zero (no change in precision)
+      mu.var[j,2] ~ dnorm(0, 0.1) # "slab"
+    }
+  })
+  
+  # make chains
+  nimbleMCMC_samples <- nimbleMCMC(code = baselineCode, 
+                                   constants = constants, 
+                                   data = data, 
+                                   inits = inits,
+                                   thin = thin,
+                                   niter = MCMC*thin*2,
+                                   nburnin = MCMC*thin)
+  
+  # summary stats
+  means = colMeans(nimbleMCMC_samples)
+  lower = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.05)
+  upper = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.95)
+  stats = data.frame(var = colnames(nimbleMCMC_samples), mean = means, lower = lower, upper=upper)
+  row.names(stats) = NULL
+  
+  # pick out results
+  p.flag = filter(stats, var=='var.flag[1]') %>% pull(mean)
+  mult =  filter(stats, var=='mu.var[1, 2]')  %>%
+    mutate(mean = exp(mean),
+           lower = exp(lower),
+           upper = exp(upper))
+  
+  #
+  to.return = list()
+  to.return$p.flag = p.flag
+  to.return$mult = mult
+  return(to.return)
+} # end of function
 
 ## Make simulated data that copies the input data
 make_sim = function(indata){
