@@ -20,7 +20,8 @@ shinyServer(function(input, output) {
       mutate(study = 1) # dummy study number
     
     # make simulated data
-    for (k in 1:20){
+    n.sims = input$n.sims
+    for (k in 1:n.sims){
       tstats.sim = make_sim(data)
       
       # get t-statistics for both statistics types
@@ -57,17 +58,21 @@ shinyServer(function(input, output) {
   output$distPlot <- renderPlot({
     
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE){histo = NULL} # stop here if no file
+    if (is.null(inFile)==TRUE){tplot = NULL} # stop here if no file
     if (is.null(inFile)==FALSE){
-    # draw the histogram
-    histo = ggplot(data=tstats(), aes(x=t, fill=statistic)) +
+    # draw the summary of the t-statistics
+    colours = grey(runif(n = input$n.sims + 1, min=0.2, max=0.8)) # grey colours for simulations
+    colours[1] = 'indianred1' # 
+    tplot = ggplot(data=tstats(), aes(x=t, colour=factor(study))) +
       theme_bw()+
-      scale_fill_manual(values = c('darkseagreen3','orange1'), labels=c('Continuous','Percentages'))+
-      geom_histogram()+
+      scale_color_manual(values = colours)+
+      stat_ecdf()+
       xlab('t-statistic')+
-      ylab('Count')
+      ylab('Cumulative density')+
+      theme(legend.position = 'none',
+            panel.grid.minor = element_blank())
     }
-    histo
+    tplot
   })
 }
 )
