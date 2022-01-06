@@ -269,6 +269,7 @@ run_bayes_test = function(in_data,
                                    constants = constants, 
                                    data = data, 
                                    inits = inits,
+                                   setSeed = 816,
                                    thin = thin,
                                    niter = MCMC*thin*2,
                                    nburnin = MCMC*thin)

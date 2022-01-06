@@ -30,15 +30,15 @@ shinyUI(fluidPage(
                       min = 1,
                       max = 200),
             
-            h5('More simulations will take more time for the results to appear.')
+            h5('More simulations will mean the model will need longer to run.')
             
         ),
             
         # Show a plot of the t-statistics
         mainPanel(
         #    
-           h4("Cumulative density plots"),
-           h5("The plot shows the trial in red and the simulated trials in grey."),
+           h4("Cumulative density functions (CDFs)"),
+           h5("The trial CDF is in red and the simulated trial CDFs in grey. A median of the simulations is in blue."),
            plotOutput("distPlot"),
            #
            h4("Model results:"),
