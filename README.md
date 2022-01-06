@@ -1,2 +1,2 @@
 # baseline shiny
-Shiny tool to test for odd results in baseline tables of randomised controlled trials.
+Shiny tool to test for under- or over-dispersed summary statistics in baseline tables of randomised trials.

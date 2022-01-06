@@ -19,6 +19,18 @@ shinyServer(function(input, output) {
     tstats = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
       mutate(study = 1) # dummy study number
     
+    ## exclude perfectly correlated neighbours, e.g. male/female gender
+    # does knock out some valid data, e.g, PMC7821012, but works very well on others, e.g, PMC6937882 with multiple examples
+    to_remove = filter(tstats, statistic %in% c('percent','numbers')) %>%
+      arrange(row) %>%
+      mutate(diff = abs(lag(t) - t*(-1)) ) %>% # perfectly negative correlation in neighbouring rows
+      filter(diff < 0.001 & t!=0) %>% # small difference
+      select(row) 
+    n_removed = nrow(to_remove)
+    if(n_removed > 0){
+      for_model = anti_join(for_model, to_remove, by=c('pmcid','row'))
+    }
+    
     # make simulated data
     n.sims = input$n.sims
     for (k in 1:n.sims){
@@ -33,7 +45,10 @@ shinyServer(function(input, output) {
     }
     
     # return
-    return(tstats)
+    to.return = list()
+    to.return$n_removed = n_removed
+    to.return$tstats = tstats
+    return(to.return)
     
   }) # end of function
 
@@ -47,14 +62,25 @@ shinyServer(function(input, output) {
       # progress message & run model
       withProgress(message = 'Running Bayesian model',
                    detail = 'This may take a few minutes...', value = 0,{
-                     results = run_bayes_test(in_data = tstats())
+                     incProgress(0.1)
+                     results = run_bayes_test(in_data = tstats()$tstats)
                      incProgress(1)
                    })
       
-      # extract stats
+      # summary stats about the table
+      for_stats = filter(tstats()$tstats, study==1) # just trial under consideration and not simulations
+      n_rows = nrow(for_stats)
+      n_continuous = sum(for_stats$statistic == 1)
+      n_percent = sum(for_stats$statistic == 2)
+      n_removed = tstats()$n_removed
+      
+      # extract stats from model
       mult = results$mult
-      text = paste('The probability that the trial has an issue is ', results$p.flag, '.\n',
-                   "The multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ".", sep='')
+      text = paste(
+        'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentages.\n',
+        'There were ', n_removed,' rows removed because they were perfectly correlated with the previous row (e.g., percentage of males and females).\n',
+        'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
+        "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
       
     }
     
@@ -68,11 +94,18 @@ shinyServer(function(input, output) {
     inFile <- input$excel.file
     if (is.null(inFile)==TRUE){tplot = NULL} # stop here if no file
     if (is.null(inFile)==FALSE){
-    # draw the summary of the t-statistics
-    colours = grey(runif(n = input$n.sims + 1, min=0.2, max=0.8)) # grey colours for simulations
-    colours[1] = 'indianred1' # 
-    tplot = ggplot(data=tstats(), aes(x=t, colour=factor(study))) +
+      n.sims = input$n.sims
+      ## draw the summary of the t-statistics
+      # set up different colour and size for trial; move trial to last
+      tstats = mutate(tstats()$tstats, study = ifelse(study==1, 999, study))
+      colours = grey(runif(n = n.sims + 1, min=0.5, max=0.9)) # grey colours for simulations
+      colours[n.sims + 1] = 'indianred1' # 
+      sizes = rep(1, n.sims + 1)
+      sizes[n.sims + 1] = 2
+      # plot
+      tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) +
       theme_bw()+
+      scale_size_manual(values = sizes)+
       scale_color_manual(values = colours)+
       stat_ecdf()+
       xlab('t-statistic')+
