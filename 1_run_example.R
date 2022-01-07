@@ -5,12 +5,25 @@ TeachingDemos::char2seed('swindon')
 source('global.R')
 
 # 1) get the data
+#
+data = my_read_excel("example_data/excel_example_retracted.xlsx") # under-dispersed
+filename = 'example_under.jpg'
+#
 data = my_read_excel("example_data/excel_example.xlsx")
+filename = 'example_fine.jpg'
+#
+data = my_read_excel("example_data/excel_example_PMC6230406.xlsx")
+filename = 'example_over.jpg'
 #data = my_read_excel("example_data/excel_example_PMC4163224.xlsx")
 
 # 2) get t-statistics for both statistics types
-tstats.c = t.stats.continuous(indata = data$continuous)
-tstats.p = t.stats.percents(indata = data$percents)
+tstats.c = tstats.p = NULL
+if(is.null(data$continuous) == FALSE){
+  tstats.c = t.stats.continuous(indata = data$continuous)
+}
+if(is.null(data$percents) == FALSE){
+  tstats.p = t.stats.percents(indata = data$percents)
+}
 # 
 tstats = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
   mutate(study = 1) # dummy study number
@@ -21,8 +34,9 @@ for (k in 1:n.sims){
   tstats.sim = make_sim(data)
   
   # get t-statistics for both statistics types
-  tstats.c = t.stats.continuous(indata = tstats.sim$continuous) 
-  tstats.p = t.stats.percents(indata = tstats.sim$percents)
+  tstats.c = tstats.p = NULL
+  if(is.null(data$continuous) == FALSE){tstats.c = t.stats.continuous(indata = tstats.sim$continuous)} 
+  if(is.null(data$percents) == FALSE){tstats.p = t.stats.percents(indata = tstats.sim$percents)}
   tstats.sim = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
     mutate(study = k+1) # dummy study number
   tstats = bind_rows(tstats, tstats.sim) # add to overall data
@@ -60,6 +74,7 @@ colours[1] = 'dodgerblue' # colour for median
 colours[n.sims + 2] = 'indianred1' # colour for trial
 sizes = rep(1, n.sims + 2)
 sizes[c(1,n.sims + 2)] = 2 # median and trial are larger
+# plot
 tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) +
   theme_bw()+
   scale_size_manual(values = sizes)+
@@ -70,8 +85,9 @@ tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) 
   ylab('Cumulative density')+
   theme(legend.position = 'none',
         panel.grid.minor = element_blank())
-# export
-jpeg('CDF.jpg', width=5, height=4, units='in', res=400, quality=100)
+
+# export examples
+jpeg(filename, width=5, height=4, units='in', res=400, quality=100)
 print(tplot)
 dev.off()
 

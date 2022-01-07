@@ -13,8 +13,13 @@ shinyServer(function(input, output) {
     }
     
     # get t-statistics for both statistics types
-    tstats.c = t.stats.continuous(indata = data$continuous)
-    tstats.p = t.stats.percents(indata = data$percents)
+    tstats.c = tstats.p = NULL
+    if(is.null(data$continuous) == FALSE){
+      tstats.c = t.stats.continuous(indata = data$continuous)
+    }
+    if(is.null(data$percents) == FALSE){
+      tstats.p = t.stats.percents(indata = data$percents)
+    }
     # 
     tstats = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
       mutate(study = 1) # dummy study number
@@ -28,7 +33,7 @@ shinyServer(function(input, output) {
       select(row) 
     n_removed = nrow(to_remove)
     if(n_removed > 0){
-      for_model = anti_join(for_model, to_remove, by=c('pmcid','row'))
+      tstats = anti_join(tstats, to_remove, by=c('pmcid','row'))
     }
     
     # make simulated data
@@ -37,8 +42,9 @@ shinyServer(function(input, output) {
       tstats.sim = make_sim(data)
       
       # get t-statistics for both statistics types
-      tstats.c = t.stats.continuous(indata = tstats.sim$continuous) 
-      tstats.p = t.stats.percents(indata = tstats.sim$percents)
+      tstats.c = tstats.p = NULL
+      if(is.null(data$continuous) == FALSE){tstats.c = t.stats.continuous(indata = tstats.sim$continuous)}
+      if(is.null(data$percents) == FALSE){tstats.p = t.stats.percents(indata = tstats.sim$percents)}
       tstats.sim = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
         mutate(study = k+1) # dummy study number
       tstats = bind_rows(tstats, tstats.sim) # add to overall data
@@ -60,7 +66,7 @@ shinyServer(function(input, output) {
     if (is.null(inFile)==FALSE){
       
       # progress message & run model
-      withProgress(message = 'Running Bayesian model',
+      withProgress(message = 'Running the Bayesian model',
                    detail = 'This may take a few minutes...', value = 0,{
                      incProgress(0.1)
                      results = run_bayes_test(in_data = tstats()$tstats)
@@ -77,7 +83,7 @@ shinyServer(function(input, output) {
       # extract stats from model
       mult = results$mult
       text = paste(
-        'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentages.\n',
+        'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentage.\n',
         'There were ', n_removed,' rows removed because they were perfectly correlated with the previous row (e.g., percentage of males and females).\n',
         'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
         "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
@@ -133,7 +139,8 @@ shinyServer(function(input, output) {
       geom_step(data=cdf_median, aes(x=mid, y=e))+ # median CDF
       xlab('t-statistic')+
       ylab('Cumulative density')+
-      theme(legend.position = 'none',
+      theme(text = element_text(size=14),
+            legend.position = 'none',
             panel.grid.minor = element_blank())
     }
     tplot

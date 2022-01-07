@@ -1,5 +1,5 @@
 # ui.R
-# Shiny app to run checks of baseline tables for trials
+# Shiny app to run under- and over-dispersion checks of baseline tables for trials
 # January 2022
 
 # 
@@ -38,26 +38,34 @@ shinyUI(fluidPage(
         mainPanel(
         #    
            h4("Cumulative density functions (CDFs)"),
-           h5("The trial CDF is in red and the simulated trial CDFs in grey. A median of the simulations is in blue."),
+           h5("The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. A median of the simulations is in blue."),
            plotOutput("distPlot"),
            #
-           h4("Model results:"),
+           h4("Bayesian model results:"),
            textOutput("testRes")
         )
     ),
     
-    # to do, report basic statistics about the table
-    # cat("The table had x rows with x continuous statistics and y percentage statistics.')
-    
     # footnotes
     mainPanel(
-        p(" \n"),
-        p("Under construction."),
+        
+        # examples from 1_run_example.R
+        h4("An example of an under-dispersed trial:"),
+        div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_under.jpg", height = 400, width = 500, style="left;")),
+     br(),
+        
+        h4("An example with no issues:"),
+     div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_fine.jpg", height = 400, width = 500, style="left;")),
+     br(),   
+     
+        h4("An example of an over-dispersed trial:"),
+     div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_over.jpg", height = 400, width = 500, style="left;")),
+    br(),
+        
+        
+        h4("Under construction."),
     p("Email ", tags$a(href='mailto:a.barnett@qut.edu.au', 'e-mail'), ' me (Adrian) if you find a bug or have any ideas for improvements.', sep='')
     )
     
 ))
 
-
-# Run the application 
-#shinyApp(ui = ui, server = server)

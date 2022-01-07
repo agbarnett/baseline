@@ -45,6 +45,10 @@ my_read_excel = function(input_file){
            'n2' = 'v4',
            'N2' = 'v5')
   
+  # null if no rows
+  if(nrow(continuous)==0){continuous = NULL}
+  if(nrow(percents)==0){percents = NULL}
+  
   # return
   data = list()
   data$continuous = continuous
@@ -127,7 +131,8 @@ t.stats.continuous = function(indata){
     rename('mean' = 'm2',
            'sd' = 'sd2',
            'n' = 'n2')
-  analysis_ready = bind_rows(l1, l2)
+  analysis_ready = bind_rows(l1, l2) %>%
+    mutate(sd = ifelse(sd==0, 0.001, sd)) # avoid zero SD
   
   #
   tstats = group_by(analysis_ready, row) %>%
@@ -295,7 +300,7 @@ run_bayes_test = function(in_data,
   return(to.return)
 } # end of function
 
-## Make simulated data that copies the input data
+## Make simulated data that copies the input data but follows the null hypothesis of good randomisation
 make_sim = function(indata){
   
   simp = simc = NULL

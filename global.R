@@ -5,5 +5,5 @@ library(ggplot2)
 library(readxl)
 library(dplyr)
 library(stringr)
-library(R2WinBUGS)
 library(nimble)
+TeachingDemos::char2seed('swindon') # for simulations
