@@ -26,14 +26,19 @@ shinyServer(function(input, output) {
     
     ## exclude perfectly correlated neighbours, e.g. male/female gender
     # does knock out some valid data, e.g, PMC7821012, but works very well on others, e.g, PMC6937882 with multiple examples
-    to_remove = filter(tstats, statistic %in% c('percent','numbers')) %>%
+    to_remove = filter(tstats, statistic == 2) %>% # percents only
       arrange(row) %>%
       mutate(diff = abs(lag(t) - t*(-1)) ) %>% # perfectly negative correlation in neighbouring rows
       filter(diff < 0.001 & t!=0) %>% # small difference
       select(row) 
     n_removed = nrow(to_remove)
     if(n_removed > 0){
-      tstats = anti_join(tstats, to_remove, by=c('pmcid','row'))
+      # remove from stats
+      tstats = anti_join(tstats, to_remove, by='row')
+      # remove from data
+      index = rep(TRUE, nrow(data$percents))
+      index[to_remove$row] = FALSE
+      data$percents = data$percents[index,]
     }
     
     # make simulated data

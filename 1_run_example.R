@@ -1,7 +1,6 @@
 # 1_run_example.R
 # run the thermal clothing trial example
 # January 2022
-TeachingDemos::char2seed('swindon')
 source('global.R')
 
 # 1) get the data
@@ -9,12 +8,12 @@ source('global.R')
 data = my_read_excel("example_data/excel_example_retracted.xlsx") # under-dispersed
 filename = 'example_under.jpg'
 #
-data = my_read_excel("example_data/excel_example.xlsx")
+data = my_read_excel("example_data/excel_example_PMID25851385.xlsx")
 filename = 'example_fine.jpg'
 #
 data = my_read_excel("example_data/excel_example_PMC6230406.xlsx")
 filename = 'example_over.jpg'
-#data = my_read_excel("example_data/excel_example_PMC4163224.xlsx")
+#data = my_read_excel("example_data/excel_example_PMC7065070.xlsx") # correlated
 
 # 2) get t-statistics for both statistics types
 tstats.c = tstats.p = NULL
@@ -44,7 +43,7 @@ for (k in 1:n.sims){
 
 # 4) run Bayesian model
 results = run_bayes_test(in_data = tstats)
-save(results, file='example_results.RData') #
+#save(results, file='example_results.RData') #
 
 # 5) draw the CDF
 ## first create a median
