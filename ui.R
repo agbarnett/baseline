@@ -58,6 +58,9 @@ shinyUI(fluidPage(
            h5("The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. The median of the simulations is in blue."),
            plotOutput("distPlot"),
            #
+           h4("Error message (if any):"),
+           span(textOutput("error"), style="color:red"),
+           #
            h4("Bayesian model results:"),
            textOutput("testRes"),
            #

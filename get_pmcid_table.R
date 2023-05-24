@@ -16,6 +16,9 @@ out_nlm = tryCatch(mt_read_pmcoa(pmcid = pmcid_function, file_format = "pmc", fi
 #
 if(length(out_nlm) > 0){ # 
   reason = 'Full text page not available'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 
 ## get study title
@@ -27,6 +30,9 @@ abstract = xml_find_all(webpage, ".//abstract") %>% xml_text() # tables and figu
 single_arm = any(str_detect(abstract, pattern='single.arm|singlearm'))
 if(single_arm==TRUE){
   reason = 'Single-arm study'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 # search for randomised trial in title or abstract
 title_abstract = paste(title, abstract, collapse=' ')
@@ -38,6 +44,9 @@ cross_sec_title = any(str_detect(tolower(title), pattern = non_rct_pattern_title
 cross_sec_abstract = any(str_detect(tolower(abstract), pattern = non_rct_pattern_abstract))
 if(cross_sec_title ==TRUE | cross_sec_abstract == TRUE){ # 
   reason = 'Not an RCT'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 
 ## remove some sections from XML
@@ -111,6 +120,9 @@ if(any(captions_negative) == TRUE){
 any_baseline_tables = any(captions_baseline)
 if(any_baseline_tables == FALSE){
   reason = 'No baseline table'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 ## find table number for baseline table
 if(sum(captions_baseline) == 1){
@@ -232,6 +244,9 @@ old_table_number = table_number # needed for text search for p-values
 table_number = exclude_text_tables(just_tables, table_number=1) # restart table number at one because non-baseline tables have been dropped
 if(table_number == 998 | table_number == 999){ # function above also checks for availability
   reason = 'No baseline table'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 # update old table number used for searching text
 old_table_number = old_table_number + (table_number-1)
@@ -250,6 +265,9 @@ caption = table_captions[table_number] #
 follow_up = str_detect(string=tolower(caption), pattern = fu_pattern)
 if(follow_up == TRUE){
   reason = 'Follow-up results in baseline table'
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 
 
@@ -259,6 +277,9 @@ weight = 2
 source('main_function.R', local = environment())
 if(class(results) == 'character'){
   reason = results$reason
+  data = list()
+  data$reason = reason
+  return(data) # end here
 }
 
 # tidy up
@@ -307,7 +328,7 @@ if(nrow(percents)==0){percents = NULL}
 data = list()
 data$continuous = continuous
 data$percents = percents
-data$reason = reason
+data$reason = NULL # can be null
 data$original_table = results$table
 return(data)
 } # end of function

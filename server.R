@@ -40,6 +40,9 @@ shinyServer(function(input, output) {
       
     }
     
+    # big if, only run stats if there's no reason
+    if(is.null(data$reason)){
+    
     # get t-statistics for both statistics types (continuous and percent)
     tstats.c = tstats.p = NULL
     if(is.null(data$continuous) == FALSE){
@@ -83,6 +86,13 @@ shinyServer(function(input, output) {
       tstats = bind_rows(tstats, tstats.sim) # add to overall data
     }
     
+    } # end of big if
+    if(!is.null(data$reason)){ # if there is a reason ...
+      n_removed = NULL
+      tstats = NULL
+      data$original_table = NULL
+    }
+    
     # return
     to.return = list()
     to.return$n_removed = n_removed
@@ -91,14 +101,14 @@ shinyServer(function(input, output) {
     to.return$original_table = data$original_table
     return(to.return)
     
-  }) # end of function
+  }) # end of reaction function
 
   # show the t-statistics for each row of the table
   output$tableRes <- renderTable({
     inPMCID <- input$pmcid
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE & inPMCID==''){table = NULL} # if no file or pmcid
-    if (is.null(inFile)==FALSE | inPMCID!=''){
+    if (is.null(inFile)==TRUE & inPMCID=='' | is.null(tstats()$tstats)){table = NULL} # if no file or pmcid
+    if (is.null(inFile)==FALSE | inPMCID!='' & !is.null(tstats()$tstats)){ # must be some t-statistics
       table = filter(tstats()$tstats, study==1) %>% # just trial under consideration and not simulations
         select(statistic, row, size, mdiff, sem, t, p) %>%
         mutate(
@@ -107,14 +117,24 @@ shinyServer(function(input, output) {
     }
     table # return
   })
+
+  # optional error message
+  output$error <- renderText({
+    inFile <- input$excel.file
+    inPMCID <- input$pmcid
+    if (is.null(inFile)==TRUE & inPMCID==''){error = NULL} # if no file
+    if (is.null(tstats()$reason)){error = NULL} # if no error
+    if (!is.null(tstats()$reason)){error = tstats()$reason} # if there is an error
+    error
+  })
   
   # run the Bayesian test
   output$testRes <- renderText({
     
     inFile <- input$excel.file
     inPMCID <- input$pmcid
-    if (is.null(inFile)==TRUE & inPMCID==''){text = NULL} # if no file
-    if (is.null(inFile)==FALSE | inPMCID!=''){
+    if ((is.null(inFile)==TRUE & inPMCID=='') | !is.null(tstats()$reason)){text = NULL} # if no file
+    if (is.null(inFile)==FALSE | inPMCID!='' & is.null(tstats()$reason)){ # must be some t-statistics
       
       # progress message & run model
       withProgress(message = 'Running the Bayesian model',
@@ -140,10 +160,6 @@ shinyServer(function(input, output) {
         'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
         "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
       }
-      # add error message to above as alternative text
-      if(!is.null(tstats()$reason)){
-        text = tstats()$reason
-      }
       } # end of if for inPMCID
     text # return
   })
@@ -165,8 +181,8 @@ shinyServer(function(input, output) {
     
     inPMCID <- input$pmcid
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE & inPMCID==''){tplot = NULL} # stop here if no file
-    if (is.null(inFile)==FALSE | inPMCID!=''){
+    if (is.null(inFile)==TRUE & inPMCID=='' | is.null(tstats()$tstats)){tplot = NULL} # stop here if no file
+    if (is.null(inFile)==FALSE | inPMCID!='' & !is.null(tstats()$tstats)){ # must be some t-statistics
       n.sims = input$n.sims
       ## draw the summary of the t-statistics ##
       
