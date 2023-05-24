@@ -5,14 +5,21 @@ source('global.R')
 
 # 1) get the data
 #
+data = my_read_excel("example_data/excel_example_PMC7988981.xlsx") # 
+filename = 'example_under.jpg'
+outfile = 'example_results_under.RData'
+#
 data = my_read_excel("example_data/excel_example_retracted.xlsx") # under-dispersed
 filename = 'example_under.jpg'
+outfile = 'example_results_under.RData'
 #
 data = my_read_excel("example_data/excel_example_PMID25851385.xlsx")
 filename = 'example_fine.jpg'
+outfile = 'example_results_fine.RData'
 #
 data = my_read_excel("example_data/excel_example_PMC6230406.xlsx")
 filename = 'example_over.jpg'
+outfile = 'example_results_over.RData'
 #data = my_read_excel("example_data/excel_example_PMC7065070.xlsx") # correlated
 
 # 2) get t-statistics for both statistics types
@@ -30,7 +37,7 @@ tstats = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
 # 3) make simulated data
 n.sims = 20
 for (k in 1:n.sims){
-  tstats.sim = make_sim(data)
+  tstats.sim = make_sim(data) # make a single simulation
   
   # get t-statistics for both statistics types
   tstats.c = tstats.p = NULL
@@ -43,7 +50,7 @@ for (k in 1:n.sims){
 
 # 4) run Bayesian model
 results = run_bayes_test(in_data = tstats)
-#save(results, file='example_results.RData') #
+save(results, file=outfile) # for paper supplement
 
 # 5) draw the CDF
 ## first create a median
@@ -74,7 +81,7 @@ colours[n.sims + 2] = 'indianred1' # colour for trial
 sizes = rep(1, n.sims + 2)
 sizes[c(1,n.sims + 2)] = 2 # median and trial are larger
 # plot
-tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) +
+tplot = ggplot(data=tstats, aes(x=t, size=factor(study), group=factor(study), colour=factor(study))) +
   theme_bw()+
   scale_size_manual(values = sizes)+
   scale_color_manual(values = colours)+
@@ -84,6 +91,13 @@ tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) 
   ylab('Cumulative density')+
   theme(legend.position = 'none',
         panel.grid.minor = element_blank())
+# add optional legend
+add_legend = FALSE
+if(add_legend==TRUE){
+  # make a legend using text - not working
+  #text = data.frame(study=999, t=-3, y=c(0.5,0.6), text = c('Median','Simulation'), col=c('dodgerblue','grey'))
+  #tplot = tplot + geom_text(data = text, aes(x=t, y=y, label=text, size=factor(study), colour=factor(study)))
+}
 
 # export examples
 jpeg(filename, width=5, height=4, units='in', res=400, quality=100)

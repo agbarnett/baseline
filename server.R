@@ -6,13 +6,41 @@ shinyServer(function(input, output) {
   
   # reactive function to get data from Excel file and create t-statistics
   tstats = reactive({
+    
+    reason = NULL # reason it went wrong
+    
+    # PMCID & excel file
+    inPMCID <- input$pmcid
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE){return(NULL)} # stop here if no file
-    if (is.null(inFile)==FALSE){
-      data = my_read_excel(inFile$datapath)
+    
+    #req(input$excel.file | input$pmcid | file.exists(input$excel.file$datapath))
+    
+    if (is.null(inFile)==TRUE & inPMCID==''){return(NULL)} # stop here if no file or PMCID
+    if (is.null(inFile)==FALSE & inPMCID==''){
+      # progress message & get data
+      withProgress(message = 'Processing the data from Excel',
+                   value = 0,{
+                     incProgress(0.1)
+                     data = my_read_excel(inFile$datapath)
+                     incProgress(1)
+                   })
+
+      data$reason = NULL # to match structure from get_pmcid_table
+      data$original_table = NULL # ditto
+    }
+    if (inPMCID!='' & is.null(inFile)==TRUE){
+      
+      # progress message & get data
+      withProgress(message = 'Getting the baseline table data from PubMed Central',
+                   value = 0,{
+                     incProgress(0.1)
+                     data = get_pmcid_table(inPMCID)
+                     incProgress(1)
+                   })
+      
     }
     
-    # get t-statistics for both statistics types
+    # get t-statistics for both statistics types (continuous and percent)
     tstats.c = tstats.p = NULL
     if(is.null(data$continuous) == FALSE){
       tstats.c = t.stats.continuous(indata = data$continuous)
@@ -44,7 +72,7 @@ shinyServer(function(input, output) {
     # make simulated data
     n.sims = input$n.sims
     for (k in 1:n.sims){
-      tstats.sim = make_sim(data)
+      tstats.sim = make_sim(data) # simulate based under H0 using the observed data
       
       # get t-statistics for both statistics types
       tstats.c = tstats.p = NULL
@@ -59,52 +87,86 @@ shinyServer(function(input, output) {
     to.return = list()
     to.return$n_removed = n_removed
     to.return$tstats = tstats
+    to.return$reason = data$reason
+    to.return$original_table = data$original_table
     return(to.return)
     
   }) # end of function
 
+  # show the t-statistics for each row of the table
+  output$tableRes <- renderTable({
+    inPMCID <- input$pmcid
+    inFile <- input$excel.file
+    if (is.null(inFile)==TRUE & inPMCID==''){table = NULL} # if no file or pmcid
+    if (is.null(inFile)==FALSE | inPMCID!=''){
+      table = filter(tstats()$tstats, study==1) %>% # just trial under consideration and not simulations
+        select(statistic, row, size, mdiff, sem, t, p) %>%
+        mutate(
+          size = as.integer(size), # to remove decimal places in presentation
+          statistic = ifelse(statistic==1, 'Continuous', 'Percent'))
+    }
+    table # return
+  })
+  
   # run the Bayesian test
   output$testRes <- renderText({
     
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE){text = NULL} # if no file
-    if (is.null(inFile)==FALSE){
+    inPMCID <- input$pmcid
+    if (is.null(inFile)==TRUE & inPMCID==''){text = NULL} # if no file
+    if (is.null(inFile)==FALSE | inPMCID!=''){
       
       # progress message & run model
       withProgress(message = 'Running the Bayesian model',
                    detail = 'This may take a few minutes...', value = 0,{
-                     incProgress(0.1)
-                     results = run_bayes_test(in_data = tstats()$tstats)
+                     incProgress(0.25)
+                     for_model = filter(tstats()$tstats, study==1) # just trial under consideration and not simulations
+                     results = run_bayes_test(in_data = for_model, p_prior = input$prior)
                      incProgress(1)
                    })
       
       # summary stats about the table
-      for_stats = filter(tstats()$tstats, study==1) # just trial under consideration and not simulations
-      n_rows = nrow(for_stats)
-      n_continuous = sum(for_stats$statistic == 1)
-      n_percent = sum(for_stats$statistic == 2)
+      n_rows = nrow(for_model)
+      n_continuous = sum(for_model$statistic == 1)
+      n_percent = sum(for_model$statistic == 2)
       n_removed = tstats()$n_removed
       
       # extract stats from model
+      if(is.null(tstats()$reason)){
       mult = results$mult
       text = paste(
         'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentage.\n',
         'There were ', n_removed,' rows removed because they were perfectly correlated with the previous row (e.g., percentage of males and females).\n',
         'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
         "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
-      
-    }
-    
-    text 
-    
+      }
+      # add error message to above as alternative text
+      if(!is.null(tstats()$reason)){
+        text = tstats()$reason
+      }
+      } # end of if for inPMCID
+    text # return
   })
+ 
+  # download the table data extracted from the XML file from PubMed Central
+  output$download <- downloadHandler(
+    filename = function(){paste('table_data_', input$pmcid, '.csv', sep='')},  # add PMCID to filename
+    content = function(fname){
+      inPMCID <- input$pmcid
+      if (inPMCID==''){table = NULL} # if no PMCID
+      table =  tstats()$original_table
+      write.csv(x = table, file = fname, quote = FALSE, row.names = FALSE)
+    }
+  )
   
+   
   # draw the histogram of t-statistics
   output$distPlot <- renderPlot({
     
+    inPMCID <- input$pmcid
     inFile <- input$excel.file
-    if (is.null(inFile)==TRUE){tplot = NULL} # stop here if no file
-    if (is.null(inFile)==FALSE){
+    if (is.null(inFile)==TRUE & inPMCID==''){tplot = NULL} # stop here if no file
+    if (is.null(inFile)==FALSE | inPMCID!=''){
       n.sims = input$n.sims
       ## draw the summary of the t-statistics ##
       
