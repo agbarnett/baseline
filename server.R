@@ -214,7 +214,7 @@ shinyServer(function(input, output) {
       sizes = rep(1, n.sims + 2)
       sizes[c(1,n.sims + 2)] = 2 # median and trial are larger
       # plot
-      tplot = ggplot(data=tstats, aes(x=t, size=factor(study), colour=factor(study))) +
+      tplot = ggplot(data=tstats, aes(x=t, linewidth=factor(study), colour=factor(study))) +
       theme_bw()+
       scale_size_manual(values = sizes)+
       scale_color_manual(values = colours)+

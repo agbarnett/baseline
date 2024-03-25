@@ -281,6 +281,7 @@ if(class(results) == 'character'){
   data$reason = reason
   return(data) # end here
 }
+source('refine_table.R', local = environment())
 
 # tidy up
 file.remove('full.xml')
@@ -304,7 +305,7 @@ if(nrow(continuous)>0){
   continuous = full_join(g1, g2, by='row') %>%
     mutate(v1 = as.character(row)) # dummy for variable names
 }
-percent = filter(results$table, statistic == 'percent')
+percent = filter(results$table, statistic %in% c('numbers','percent'))
 if(nrow(percent)>0){
   g1 = filter(percent, column == 1) %>% # first group
     rename('N1' = 'sample_size',
@@ -322,13 +323,13 @@ if(nrow(percent)>0){
 
 # null if no rows
 if(nrow(continuous)==0){continuous = NULL}
-if(nrow(percents)==0){percents = NULL}
+if(nrow(percent)==0){percents = NULL}
 
 # return data with percents and continuous
 data = list()
 data$continuous = continuous
 data$percents = percents
-data$reason = NULL # can be null
+data$reason = NULL # null here as made it to the end
 data$original_table = results$table
 return(data)
 } # end of function

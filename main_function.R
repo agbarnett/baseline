@@ -2,6 +2,9 @@
 # function that does the heavy lifting
 # not run as a function in shiny version
 
+# start with no reason
+reason = NULL
+
 # maximum number of tables - probably no longer needed
 max_table = length(webpage %>% xml_nodes("table-wrap"))
 if(table_number > max_table){ # table likely in appendix or graphic
@@ -637,6 +640,7 @@ for (loop in seq(1, upper_column, 2)){ # is there a perfect pattern in neighbour
 }
 if(re_number==TRUE){table = mutate(table, column = as.numeric(as.factor(column)))} # re-number to avoid gaps in column numbers
 
+## return
 results = list()
-results$reason = NULL # no reason to exclude
+results$reason = reason
 results$table = table

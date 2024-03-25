@@ -5,10 +5,10 @@ account: aushsi
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5392037
-bundleId: 7256500
+bundleId: 8411236
 url: https://aushsi.shinyapps.io/baseline/
-when: 1684916547.57299
-lastSyncTime: 1684916547.573
+when: 1711273266.0731
+lastSyncTime: 1711273266.07311
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: bugs_model.txt|example_fine.jpg|example_over.jpg|example_results_fine.RData|example_results_over.RData|example_under.jpg|excel_template.xlsx|README.md|example_data
+ignoredFiles: bugs_model.txt|example_results_fine.RData|example_results_over.RData|excel_template.xlsx|README.md
