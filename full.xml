@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2024-03-30T02:08:51Z</responseDate>
+  <request verb="GetRecord" identifier="oai:pubmedcentral.nih.gov:5640030" metadataPrefix="pmc">https:/www.ncbi.nlm.nih.gov/pmc/oai/oai.cgi</request>
+  <GetRecord>
+    <record>
+      <header>
+        <identifier>oai:pubmedcentral.nih.gov:5640030</identifier>
+        <datestamp>2017-10-19</datestamp>
+        <setSpec>bmjo</setSpec>
+        <setSpec>pmc-open</setSpec>
+      </header>
+      <metadata>
+        <article xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ali="http://www.niso.org/schemas/ali/1.0/" xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="https://jats.nlm.nih.gov/ns/archiving/1.3/ https://jats.nlm.nih.gov/archiving/1.3/xsd/JATS-archivearticle1-3.xsd" article-type="research-article">
+          <body>
+            <sec sec-type="intro" id="s1">
+              <title>Introduction</title>
+              <p>Despite its generally warm climate, Australia consistently experiences a winter increase in deaths. A study of daily mortality from 1996 to 2004 in Brisbane estimated that 5000 years of life are lost each year due to exposure to low temperatures. 1  An international study of daily deaths and temperatures from 1998 to 2009 estimated that 6.5% of all deaths in Australia are due to exposure to low temperatures, 2  with most deaths occurring on the more common ‘moderate cold’ days than the less frequent but riskier ‘extreme cold’ days (coldest 2.5% of days). This international study confirmed that countries with cold climates (eg, Sweden) have a smaller increase in winter deaths than countries with warm climates (eg, Spain), a result that was first shown by the Eurowinter study in 1997. 3 
+</p>
+              <p>A plausible theory for this difference is that people in warm climates do not adequately protect themselves against low temperatures because of a lack of awareness of the health risks of cold and buildings that are designed to be cool in summer meaning they also lose heat in winter. The Eurowinter study found that at a temperature of 7°C, 72% of people in Southern Finland wore a hat, while only 13% of people in Athens did. 3 
+</p>
+              <p>A hypothesised route from low outdoor temperatures to death and hospitalisation is a rise in blood pressure. There is a clear link between low temperatures and increased systolic blood pressure. 4 5  The strength of this association mirrors the geographical pattern in deaths as it is stronger in Australia and other warm climate countries. 6  Low temperatures are also associated with other cardiovascular risk factors including reduced heart rate 7  and increased inflammatory factors such as plasma cholesterol, 8 9  blood viscosity 8 10  and C reactive protein (CRP). 11 
+</p>
+              <p>Previous randomised trials have shown that keeping people warmer during winter improves their health. In a randomised controlled trial in New Zealand, houses were retrofitted with insulation for people with respiratory disease. 12  The treatment group experienced significantly fewer hospitalisations, general practice (GP) visits, days off school and days off work. A randomised controlled trial in Scotland upgraded flats that were cold, damp and mouldy to being comfortably warm. 13  The treatment group experienced statistically and clinically significant improvements in blood pressure and general health, and fewer hospital admissions. A randomised controlled trial in Japan found that intensive room heating lowered blood pressure during winter. 14 
+</p>
+              <p>Given the success of housing-level interventions in improving winter health, we hypothesised that a personal-level intervention would also have health benefits. In winter 2012, we ran a small pilot trial of giving thermal clothing to patients with heart failure in an effort to improve their health during winter. 15  The trial presented here has more patients, more comprehensive data and builds on lessons learnt from the pilot, including giving participants a choice of clothing, collecting data on sleep and collecting data from participants during the period of lowest average temperatures in midwinter.</p>
+              <p>A recent review of interventions to reduce excess winter deaths found 23 published interventions on housing or fuel poverty 16  but only one on clothing which was our previous pilot. Hence, there is a need for further study on what would be a financially viable solution to potentially reduce the winter increase in morbidity and mortality.</p>
+            </sec>
+            <sec sec-type="methods" id="s2">
+              <title>Methods</title>
+              <sec id="s2a">
+                <title>Participants</title>
+                <p>We targeted people with heart failure because our previous study in Australia found that heart failure had the highest relative increase in winter deaths across all categories of cardiovascular disease. 17  Patients with heart failure were identified and approached in a cardiology outpatient clinic and cardiology wards of The Prince Charles Hospital, Brisbane, between 5 April and 2 June 2016. The approach and consent was made by a research nurse who showed all potential participants a 3 min video that explained the background to the study and what participation would involve.</p>
+                <p>Patients were eligible if they had a diagnosis of either systolic or diastolic heart failure and were older than 50 years. Patients were excluded if they: had a serious comorbidity (eg, cancer) or a serious physical impairment that prevented the participant from dressing themselves; lived in a residential care facility where the staff predominantly control their environment and clothing; or were unable to give informed consent or did not wish to participate.</p>
+              </sec>
+              <sec id="s2b">
+                <title>Trial design</title>
+                <p>The study was a randomised, superiority, parallel group trial, comparing thermal clothing with usual care. The randomisation list was created using R (V.3.1.1). 18  The list was in randomly permuted blocks of 2, 4, 6 and 8 in a 1:1 ratio using the <italic>blockrand</italic> function. 19  The list was stratified by recruitment location (ward/clinic) because of the higher risk of subsequent events for ward patients.</p>
+                <p>The randomised list was loaded into the REDCap (Research Electronic Data Capture) data management software. 20  The research nurse first completed the informed consent and baseline questionnaire with the participant using REDCap on a computer tablet, and then clicked a button to reveal the randomised group. It was not possible to blind the research nurse or the participants to their group.</p>
+                <p>The trial was prospectively registered with the Australian New Zealand Clinical Trial Registry (ACTRN12615001023549), and the study protocol was published online. 21 
+</p>
+              </sec>
+              <sec id="s2c">
+                <title>Intervention</title>
+                <p>Participants randomised to the control group received nothing. Participants randomised to the thermal clothing group were immediately given the following by the research nurse (see online  appendix file ):<list list-type="order"><list-item><p>Two thermal tops, one thermal hat and two pairs of thermal socks, all made of 100% polypropylene.</p></list-item><list-item><p>A large display digital thermometer with batteries fitted. This was to help participants be more aware of the temperature inside their home and so help them decide on when to wear the thermals.</p></list-item><list-item><p>An advisory sheet on when to wear the thermals which recommended wearing the thermals at indoor or outdoor temperatures below 18°C. Participants were advised to wear the thermals both indoors and outdoors.</p></list-item></list>
+</p>
+                <p>Prior to the trial three patients with heart failure were interviewed by the research team concerning their thoughts around using thermal clothing and what sort of clothing they would prefer. This influenced our study design to have a range of thermal clothes available to allow patients to choose a preferred colour and style for the tops and hats. We considered including thermal leggings, but decided against providing them because of the risk of falling when putting on or taking off leggings in this population.</p>
+                <p>Thermal clothing works by removing the energy cost associated with shivering, and by trapping a warm air layer close to the surface of the skin, but allowing moisture to move freely from the skin’s surface through the garment and be evaporated.</p>
+              </sec>
+              <sec id="s2d">
+                <title>Data collection</title>
+                <p>A summary of the data collection is in  figure 1 . Baseline data were collected face to face by the research nurse. Follow-up data were collected by telephone by research assistants during midwinter and at the end of winter. Blood tests were taken at baseline, midwinter and the end of winter. Healthcare data were passively collected throughout winter by gaining consent to access the participants’ routinely collected medical data. At baseline, all participants were given two data loggers to automatically record indoor temperatures in their bedroom and living room (see online  appendix file ), which they returned via post at the end of winter. Participants were asked to stick the loggers to an internal wall, high enough to be out of reach of young children and pets, and away from any direct source of cooling or heating (eg, fire or air conditioner).</p>
+                <fig id="F1" orientation="portrait" position="float">
+                  <label>Figure 1</label>
+                  <caption> Summary of the data collection over time, showing example times for a participant recruited in mid-May with telephone follow-ups in July and September. Based on Bureau of Meteorology data for the last 10 years, the coldest day in Brisbane was 30 June. GP, general practice.</caption>
+                </fig>
+                <p>At midwinter, all participants were mailed a diary to prospectively record their clothing for 5 days (see online  appendix file ). The gender-specific diary included over 20 different types of clothing and was split into four times of the day: morning, afternoon, evening and night, and recorded whether the clothes were worn inside and/or outside. The clothes worn by time of day were summed to give an ensemble ‘clo’ which measures overall clothing insulation, where an ensemble clo of 1 represents the amount of insulation that allows a person at rest to maintain thermal equilibrium at 21°C in a normally ventilated room. 22 
+</p>
+                <p>All blood tests were done by a technician blind to treatment group. The follow-up phone calls were made by research assistants who were initially blind to treatment group. However, some participants spoke about the thermals during the call, and the last question of the call differed by treatment group.</p>
+              </sec>
+              <sec id="s2e">
+                <title>Primary outcome</title>
+                <p>The primary outcome was the number of days in hospital during winter adjusted for the number of days at risk. The standard days at risk were from 1 May 2016 until 30 September 2016. For participants recruited after 1 May, the days began on their day of recruitment. For participants who died, the days ended on their date of death.</p>
+              </sec>
+              <sec id="s2f">
+                <title>Secondary outcomes</title>
+                <list list-type="order">
+                  <list-item>
+                    <p>the number of GP visits during winter adjusted for participants’ days at risk</p>
+                  </list-item>
+                  <list-item>
+                    <p>the number of presentations to public emergency departments during winter adjusted for participants’ days at risk</p>
+                  </list-item>
+                  <list-item>
+                    <p>quality of life measured using EuroQol five dimension (EQ-5D) with the weights for an Australian population. 23  Participants who died before a data collection were given an EQ-5D of zero</p>
+                  </list-item>
+                  <list-item>
+                    <p>sleep measured using the Pittsburgh sleep questionnaire 24 
+</p>
+                  </list-item>
+                  <list-item>
+                    <p>the cardiovascular risk factors of cholesterol, CRP, fibrinogen and relative serum viscosity. These were chosen based on past epidemiological evidence of increasing in winter</p>
+                  </list-item>
+                  <list-item>
+                    <p>mortality, but this will be assessed in 2021 in order to allow a sufficient number of deaths to accumulate.</p>
+                  </list-item>
+                </list>
+                <p>Blood pressure and blood viscosity were planned secondary outcomes. However, the pathology service we used to collect the follow-up bloods (1) did not record blood pressure and (2) recorded serum viscosity instead of blood viscosity.</p>
+              </sec>
+              <sec id="s2g">
+                <title>Statistical methods</title>
+                <p>The primary outcome of days in hospital and secondary outcome of Emergency Department (ED) presentations were compared using the bias corrected bootstrap to create non-parametric 95% CIs for the mean difference between the two groups. 25  The use of a non-parametric test was based on the distribution of hospital data in the pilot. 15 
+</p>
+                <p>We aimed to recruit 60 participants per group to give an 85% power to detect a halving in the average length of hospital stay during winter from 6 days in the control group to 3 days in the treatment group. We assumed a halving in hospital days based on the halving in hospital admissions from a randomised controlled trial of home insulation. 12 
+</p>
+                <p>We used an analysis of covariance (ANCOVA) for the secondary outcomes. 26  The ANCOVA model was as follows:</p>
+                <p><italic>Y<sub>i,t</sub></italic> = α<sub>0</sub> + α<sub>1</sub><italic>Y<sub>i,0</sub></italic> + α<sub>2</sub><italic>X<sub>i</sub></italic> + α<sub>3</sub><italic>X</italic><sub>i</sub>×I(<italic>t</italic>=2) + δ<sub>i</sub>, <italic>i</italic>=1,…,<italic>n</italic>, <italic>t</italic>=1,2, (equation 1),</p>
+                <p>where subscript <italic>i</italic> indexes participants and <italic>t</italic> time, <italic>Y</italic> is the variable of interest measured at baseline (<italic>t</italic>=0) and the two follow-ups (<italic>t</italic>=1,2) and <italic>X</italic> is the treatment group (zero for usual care and 1 for thermal clothing). The δ’s are random intercepts to adjust for repeated follow-ups from the same participant. We added baseline as a predictor as this reduces the error variance and hence increases statistical power. 27  We included an interaction between treatment and follow-up time because we assumed that the effect would be different in midwinter (which is the peak period of risk) compared with the end of winter. We used a similar model for GP visits but this compared GP visits throughout winter, and hence there was no need for the end of winter interaction or the random intercepts.</p>
+                <p>We checked the residuals of every analysis to look for outliers. The histogram of the residuals for CRP had a large positive outlier and hence CRP was base <italic>e</italic> log-transformed.</p>
+                <p>Data were analysed using intention to treat, so participants in the thermal group who did not wear the thermals were analysed in the thermal group. We also used a per-protocol analysis in an attempt to isolate any benefit to wearing thermals. Participants in the thermal clothing arm were included in the per protocol analysis if they reported use of the thermals at the midwinter phone call and/or reported use of the thermals in the clothing diary. Participants in the usual care arm were excluded in the per-protocol analysis if they bought their own thermals as a result of being in the trial. We note that excluding participants based on their behaviour can introduce confounding. 28 
+</p>
+                <p>There were no missing data for the primary outcome. For the secondary outcomes, we randomly imputed wave and item missing data. If a participant was missing a baseline or follow-up outcome, then their result was randomly selected with replacement from all results at the same wave. This sampling was done regardless of treatment group so that the imputed data supported the null hypothesis which would reduce the size of a true treatment effect. Ten imputed data sets were created and the results combined using the <italic>mitools</italic> package. 29 
+</p>
+                <p>We graphically described the clothing data using a boxplot of ensemble clo by time of day and used a clo threshold for sufficient clothing of 1. We examined differences in clothing between groups using a regression model with a random intercept for each participant as participants completed the diary for 5 days. The model included a main effect for thermal clothing group and interactions between clothing group and time of day. We used a multiple logistic regression model with a dependent variable of thermals worn (yes/no) in the intervention group only; the aim was to examine differences by gender, place and time of day. This model included a random intercept per participant.</p>
+                <p>We plotted indoor temperature data over time and compared the indoor temperature data with outdoor data from the Bureau of Meteorology. We used a reference point of 18°C which is the recommended minimum indoor temperature from a recent Public Health England report that we assumed was relevant for Australia. 30  We examined differences in indoor temperatures between the treatment groups using a regression model with a random intercept for each participant.</p>
+                <p>All tables and graphs were initially created using a scrambled treatment group as an attempt to find coding errors and statistical issues. The treatment was unscrambled once the investigators were satisfied with the output and no further changes to the analyses were made. The analysis was created using Sweave in R V.3.3.1. 18  Results are presented as mean differences (treatment minus usual care) with 95% CIs.</p>
+              </sec>
+            </sec>
+            <sec sec-type="results" id="s3">
+              <title>Results</title>
+              <p>One-hundred and forty-two patients were approached to participate and 91 (64%) agreed and were eligible. The main reason for not participating was a lack of interest (n=24), and only eight patients were ineligible. The baseline characteristics of the participants are in  table 1 .</p>
+              <table-wrap id="T1" orientation="portrait" position="float">
+                <label>Table 1</label>
+                <caption> Baseline characteristics for the 91 participants</caption>
+                <table frame="hsides" rules="groups">
+                  <thead>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Characteristic</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Category</td>
+                      <td align="left" rowspan="1" colspan="1">Usual care (n=44)</td>
+                      <td align="left" rowspan="1" colspan="1">Thermal clothing (n=47)</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1">Sociodemographic characteristics</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Age, mean (SD)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">65 (9)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">64 (10)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"> Gender</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Male</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">31 (70)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">36 (77)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"> Recruited from</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Clinic</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">37 (84)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">39 (83)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"/>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Ward</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">7 (16)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">8 (17)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> In previous pilot study</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">4 (9)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">0 (0)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Private health/DVA</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">10 (23)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">10 (21)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"> Enthusiasm to</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">High</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">34 (77)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">28 (60)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"> Participate</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Neutral</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">9 (20)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">15 (32)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"/>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Low</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">1 (2)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">4 (9)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> EQ-5D, mean (SD)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">0.67 (0.25)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">0.73 (0.20)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1">Clinical</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"> Heart failure type</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Systolic</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">35 (80)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">35 (74)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"/>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Diastolic</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">9 (20)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">10 (21)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1"/>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Missing</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">0 (0)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">2 (4)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Ejection fraction (%), mean (SD)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">39 (14)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">38 (13)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1">Blood tests, all mean (SD)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Systolic blood pressure (mm Hg)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">114 (18)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">117 (15)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Diastolic blood pressure (mm Hg)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">67 (10)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">70 (8)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> C reactive protein (mg/L)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">6.8 (10.6)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">9.6 (16.9)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Cholesterol (mmol/L)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">3.9 (1.2)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">4.2 (1.5)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Fibrinogen (mg/dL)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">3.7 (1.1)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">3.8 (1.3)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1">Sleep, all mean (SD)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1"/>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Minutes to fall asleep</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">23 (26)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">25 (26)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Actual hours of sleep</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">6.4 (1.6)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">6.6 (1.5)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" colspan="2" align="left" rowspan="1"> Overall Pittsburgh score</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">7.8 (4.9)</td>
+                      <td valign="top" align="char" char="(" rowspan="1" colspan="1">7.6 (4.3)</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table-wrap-foot>
+                  <fn id="tblfn1">
+                    <p>Data are number (%) of participants unless stated otherwise.</p>
+                  </fn>
+                  <fn id="tblfn2">
+                    <p>DVA, Department of Veterans’ affairs; EQ-5D, EuroQol five dimensions.</p>
+                  </fn>
+                </table-wrap-foot>
+              </table-wrap>
+              <p>The flow diagram of participants is in  figure 2 . The primary outcome of hospital days was available for all participants. One participant did not complete the Medicare consent form and so were missing the secondary outcome of GP visits. Three participants in the usual care group died during follow-up.</p>
+              <fig id="F2" orientation="portrait" position="float">
+                <label>Figure 2</label>
+                <caption> Flowchart of participants.</caption>
+              </fig>
+              <p>The number and percent missing at each data collection are in  table 2 . Missing data were predicted by low or neutral enthusiasm to participate, younger age and female gender but not by treatment group (see online  appendix file ).</p>
+              <table-wrap id="T2" orientation="portrait" position="float">
+                <label>Table 2</label>
+                <caption> Numbers and percent completing each data collection and the median date of collection</caption>
+                <table frame="hsides" rules="groups">
+                  <thead>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Data collection</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Median date</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Usual care (n=44)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Thermal clothing (n=47)</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Clothing diary</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">5 July</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">28 (64%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">29 (62%)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Temperature loggers</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">6 July</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">32 (73%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">40 (85%)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Midwinter bloods</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">8 July</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">31 (70%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">31 (66%)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">Midwinter phone call</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">13 July</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">43 (98%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">43 (91%)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">End of winter bloods</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">26 September</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">31 (70%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">31 (66%)</td>
+                    </tr>
+                    <tr>
+                      <td valign="top" align="left" rowspan="1" colspan="1">End of winter phone call</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">26 September</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">39 (89%)</td>
+                      <td valign="top" align="left" rowspan="1" colspan="1">43 (91%)</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table-wrap-foot>
+                  <fn id="tblfn3">
+                    <p>All participants completed baseline.</p>
+                  </fn>
+                </table-wrap-foot>
+              </table-wrap>
+              <sec id="s3a">
+                <title>Primary outcome</title>
+                <p>The mean number of days in hospital during winter was 4.2 in the usual care group and 3.0 in the thermal clothing group. The mean difference was –1.2 days with a 95% CI of –4.8 to 2.5 days. The distribution of days in hospital is compared by treatment group in  table 3 . We used three categories for the number of days because over half the participants had no days in hospital while 10 participants had 10 or more days.</p>
+                <table-wrap id="T3" orientation="portrait" position="float">
+                  <label>Table 3</label>
+                  <caption> Days in hospital during winter by treatment group, numbers and percentages.</caption>
+                  <table frame="hsides" rules="groups">
+                    <thead>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Days in hospital</td>
+                        <td align="left" rowspan="1" colspan="1">Usual care</td>
+                        <td align="left" rowspan="1" colspan="1">Thermal clothing</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">None</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">22 (50)</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">27 (57)</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">(0–1)</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">6 (14)</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">10 (21)</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">&gt;1</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">16 (36)</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">10 (21)</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Total</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">44 (100)</td>
+                        <td align="char" char="(" rowspan="1" colspan="1">47 (100)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </table-wrap>
+              </sec>
+              <sec id="s3b">
+                <title>Secondary outcomes</title>
+                <p>The differences in the secondary outcomes are in  table 4  and show the midwinter difference and change at the end of winter (α<sub>2</sub> and α<sub>3</sub> in equation 1, respectively). We expected any differences to be greatest in midwinter with a potential reduction of differences at the end of winter due to warmer temperatures. Fibrinogen fitted this pattern as there was a mean reduction of 0.29 mg/dL at midwinter which was effectively cancelled by the 0.33 mg/dL increase at the end of winter.</p>
+                <table-wrap id="T4" orientation="portrait" position="float">
+                  <label>Table 4</label>
+                  <caption> Mean absolute differences (thermal clothing minus usual care) and 95% CIs for secondary outcomes at midwinter and the change at the end of winter</caption>
+                  <table frame="hsides" rules="groups">
+                    <thead>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1"/>
+                        <td align="left" rowspan="1" colspan="1">Midwinter difference</td>
+                        <td align="left" rowspan="1" colspan="1">95% CI</td>
+                        <td align="left" rowspan="1" colspan="1">End of winter change</td>
+                        <td align="left" rowspan="1" colspan="1">95% CI</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Emergency department presentations during winter</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.07</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.49 to 0.43</td>
+                        <td align="char" char="." rowspan="1" colspan="1">NA</td>
+                        <td align="char" char="." rowspan="1" colspan="1"/>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">EQ-5D (quality of life)</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.03</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.13 to 0.07</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.01</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.10 to 0.12</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Overall Pittsburgh sleep score * 
+</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.70</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–1.96 to 0.57</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.00</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–1.16 to 1.16</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Actual sleep hours</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.22</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.33 to 0.77</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.27</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.90 to 0.35</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Minutes to fall asleep</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–5.6</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–20.1 to 9.0</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–6.3</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–21.2 to 8.7</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Cholesterol (mmol/L)</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.03</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.37 to 0.43</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.03</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.37to  0.42</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">C reactive protein (mg/L)†</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.94</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.61 to 1.48</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.84</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.49 to 1.46</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Fibrinogen (mg/dL)</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.29</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.61 to 0.02</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.33</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.09 to 0.74</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" align="left" rowspan="1" colspan="1">Relative serum viscosity</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.04</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.07 to 0.01</td>
+                        <td align="char" char="." rowspan="1" colspan="1">0.01</td>
+                        <td align="char" char="." rowspan="1" colspan="1">–0.02 to 0.05</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table-wrap-foot>
+                    <fn id="tblfn4">
+                      <p>The results for C reactive protein are a ratio (thermal/usual care).</p>
+                    </fn>
+                    <fn id="tblfn5">
+                      <p>*Higher scores indicate worse sleep.</p>
+                    </fn>
+                    <fn id="tblfn6">
+                      <p>†Results are rate ratios.</p>
+                    </fn>
+                    <fn id="tblfn7">
+                      <p>EQ-5D, EuroQol five dimensions.</p>
+                    </fn>
+                  </table-wrap-foot>
+                </table-wrap>
+                <p>Many mean differences were close to zero, such as the change in emergency department presentations and quality of life. For GP visits, the relative risk was 1.03 (95% CI 0.97 to 1.09), meaning a slightly increased rate of GP visits in the thermal clothing group. There was some improvement in sleep in the intervention group with a lower overall Pittsburgh score and shorter time to fall asleep, although both 95% CIs included zero. There was little difference between the groups for cholesterol and CRP, but relative serum viscosity was reduced in the thermal clothing group.</p>
+                <p>There was little difference for any outcome between the intention to treat and per-protocol analysis (see online  appendix file ). Imputing missing data had little impact on the secondary outcomes (see online  appendix file ).</p>
+                <p>Boxplots summarising the clothes worn are in  figure 3 . Most participants had a clo value under 1 at most times of the day. There was no overall difference in the clo between groups, mean difference (thermal clothing minus usual care) –0.07 (95% CI –0.21 to 0.08); however, the mean clo was higher in the thermal clothing group at night, mean difference 0.13 (95% CI 0.03 to 0.23). Participants wore fewer clothes at night, with an average 1.5 fewer items compared with the morning (95% CI –1.9 to –1.0), likely because of use of bedding. The intervention group wore 0.5 more items on average (95% CI –0.4 to 1.3), but this increase was not statistically significant and there were no significant intervention group by time of day interactions (see online  appendix file ). Most participants in the thermal clothing group (85%) reported using the thermals. A multiple logistic regression model of the clothing diaries from the intervention group found that the thermals were most commonly worn in the morning (see online  appendix file ), which was the coldest time indoors ( figure 4 ).</p>
+                <fig id="F3" orientation="portrait" position="float">
+                  <label>Figure 3</label>
+                  <caption> Boxplot of ensemble clothing using the clo by time of day and treatment group. Higher clo values indicate better insulation and an ensemble clo of 1 is the amount of insulation that allows a person at rest to maintain thermal equilibrium at 21°C in a normally ventilated room.</caption>
+                </fig>
+                <fig id="F4" orientation="portrait" position="float">
+                  <label>Figure 4</label>
+                  <caption> Indoor temperature data in July averaged by hour of day with grey lines for five randomly selected participants. The horizontal line at 18°C is the recommended minimum indoor temperature. The red line shows the outdoor average for Brisbane in July.</caption>
+                </fig>
+                <p>The indoor temperature data for July are summarised in  figure 4 . The indoor temperature in many homes mirrored the outdoor temperature with a clear fall at night and 75% of homes had a mean temperature below the recommended 18°C. There was no clear difference in indoor temperature between groups, mean difference (thermal clothing minus usual care) 0.4°C (95% CI -0.3°C to 1.0°C).</p>
+              </sec>
+            </sec>
+            <sec sec-type="discussion" id="s4">
+              <title>Discussion</title>
+              <p>This randomised controlled trial found no clear benefit of wearing thermal clothing during winter in patients with heart failure. The mean difference in the primary outcome of hospital days did favour the thermal clothing group, but the CI included zero. Although not statistically significant, the reduction in hospital days associated with providing thermal clothing could have a high probability of being cost saving. A reduction of 1.2 days in hospital days per participant is a saving of AUD $284 using a recent estimate of a willingness to pay for a bed day during winter. 31  Providing thermals to patients with heart failure would cost an estimated $A92 per patient for the time of a nurse and all materials, which would mean an average saving of $A192 per patient. Scaling this saving up to the population of at-risk patients could mean a large saving for health services, especially if the reduction in bed days persists beyond the first winter. However, a formal cost-effectiveness analysis is needed to explore this and this simple comparison should not be interpreted as proof of cost-effectiveness.</p>
+              <p>There was evidence of improved clothing at night in the thermal clothing group ( figure 3 ), which could explain the small positive impact on sleep ( table 4 ). However, there was no improvement in clothing at other times of the day and no improvement in overall quality of life. The lack of improvement may reflect the difficulty of changing everyday behaviour and there are multiple barriers to consider here including a perceived lack of risk, a reluctance to be seen in unusual clothes, 32  and simply forgetting to put the thermal clothes on or losing them. Reminder phone calls or text messages during winter to the participants in the intervention group may have encouraged greater use of the thermals, although this would increase the cost of the intervention.</p>
+              <p>Many of the previous studies that have improved health during winter have used home insulation. 16  Insulation costs far more than thermal clothing, but is a one-off cost that works without the need to change behaviour and benefits all members of a household. Insulation also increases energy efficiency, and for homes with wood or coal heaters would have the added benefit of reducing exposure to indoor air pollution. 33 
+</p>
+              <p>Our results clearly show that people with heart failure are not wearing sufficient clothing and are frequently exposed to low indoor temperatures during winter. Assuming our sample is representative of the wider Australian population living with heart failure, the results may help explain the large winter increase in death and hospitalisation in Australia.</p>
+              <p>There are some important limitations to the trial. It is a small trial and we did not meet our target sample size. This means the study was underpowered to show our hypothesised 50% reduction in the number of days in hospital during winter. Smaller reductions, such as a 20% reduction in days, would still have public health benefits, but would need a larger sample size. The key secondary outcome of blood pressure was lost and the viscosity outcome changed. The clothing diary, designed by our research team, was not validated and there may be under-reporting of actual clothes worn, and we recommend that future clothing diaries also ask about bed clothes used at night.</p>
+            </sec>
+            <sec sec-type="supplementary-material">
+              <title>Supplementary Material</title>
+            </sec>
+          </body>
+          <back>
+            <ack>
+              <p>We thank the participants for their time and dedication to the study. We thank staff and students at the Australian Centre for Health Services Innovation (AusHSI) for help preparing the study materials. We thank the Australian Government Department of Human Services for granting us access to the participants’ GP data. The thermal clothing was purchased from Wilderness Wear Australia with a discount for buying in bulk.</p>
+            </ack>
+            <fn-group>
+              <fn fn-type="other">
+                <p><bold>Contributors:</bold> AGB conceived the study and led the application for funding. AGB designed the study with input from DP, JFF and IS. DP and AB oversaw patient recruitment. AB collected the baseline data. AGB ran the statistical analysis and wrote the first draft. All authors provided input on the first draft. AGB is the guarantor.</p>
+              </fn>
+              <fn fn-type="other">
+                <p><bold>Funding:</bold> This study was funded by the Heart Foundation of Australia Vanguard (Grant number 100568). Adrian Barnett is supported by an NHMRC Senior Research Fellowship (APP1117784).</p>
+              </fn>
+              <fn fn-type="COI-statement">
+                <p><bold>Competing interests:</bold> None declared.</p>
+              </fn>
+              <fn fn-type="other">
+                <p><bold>Ethics approval:</bold> The Prince Charles Hospital Human Research Ethics Committee.</p>
+              </fn>
+              <fn fn-type="other">
+                <p><bold>Provenance and peer review:</bold> Not commissioned; externally peer reviewed.</p>
+              </fn>
+              <fn fn-type="other">
+                <p><bold>Data sharing statement:</bold> The full de-identified dataset and statistical code are available on figshare <ext-link ext-link-type="uri" xlink:href="https://figshare.com/articles/Thermal_clothing_clinical_trial/4649231">https://figshare.com/articles/Thermal_clothing_clinical_trial/4649231</ext-link>
+</p>
+                <p>. We welcome re-use and re-analysis of the data. The secondary outcome of GP visits could not be shared due to restrictions by the Department of Human Services.</p>
+              </fn>
+            </fn-group>
+            <ref-list>
+              <title>References</title>
+              <ref id="R1">
+                <label>1.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Huang</surname><given-names>C</given-names></name>, <name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>Wang</surname><given-names>X</given-names></name>, <etal>et al</etal></person-group><article-title>The impact of temperature on years of life lost in Brisbane, Australia</article-title>. <source>Nat Clim Chang</source><year>2012</year>;<volume>2</volume>:<fpage>265</fpage>–<lpage>70</lpage>. <pub-id pub-id-type="doi">10.1038/nclimate1369</pub-id>
+</mixed-citation>
+              </ref>
+              <ref id="R2">
+                <label>2.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Gasparrini</surname><given-names>A</given-names></name>, <name name-style="western"><surname>Guo</surname><given-names>Y</given-names></name>, <name name-style="western"><surname>Hashizume</surname><given-names>M</given-names></name>, <etal>et al</etal></person-group><article-title>Mortality risk attributable to high and low ambient temperature: a multicountry observational study</article-title>. <source>Lancet</source><year>2015</year>;<volume>386</volume>:<fpage>369</fpage>–<lpage>75</lpage>. <pub-id pub-id-type="doi">10.1016/S0140-6736(14)62114-0</pub-id>
+<pub-id pub-id-type="pmid">26003380</pub-id></mixed-citation>
+              </ref>
+              <ref id="R3">
+                <label>3.</label>
+                <mixed-citation publication-type="journal"><collab>Group TE</collab>. <article-title>Cold exposure and winter mortality from ischaemic heart disease, cerebrovascular disease, respiratory disease, and all causes in warm and cold regions of Europe</article-title>. <source>The Lancet</source><year>1997</year>;<volume>349</volume>:<fpage>1341</fpage>–<lpage>6</lpage>.</mixed-citation>
+              </ref>
+              <ref id="R4">
+                <label>4.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Ulmer</surname><given-names>H</given-names></name>, <name name-style="western"><surname>Kelleher</surname><given-names>C</given-names></name>, <name name-style="western"><surname>Diem</surname><given-names>G</given-names></name>, <etal>et al</etal></person-group><article-title>Estimation of seasonal variations in risk factor profiles and mortality from coronary heart disease</article-title>. <source>Wien Klin Wochenschr</source><year>2004</year>;<volume>116</volume>:<fpage>662</fpage>–<lpage>8</lpage>. <pub-id pub-id-type="doi">10.1007/s00508-004-0222-x</pub-id>
+<pub-id pub-id-type="pmid">15941075</pub-id></mixed-citation>
+              </ref>
+              <ref id="R5">
+                <label>5.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Yang</surname><given-names>L</given-names></name>, <name name-style="western"><surname>Li</surname><given-names>L</given-names></name>, <name name-style="western"><surname>Lewington</surname><given-names>S</given-names></name>, <etal>et al</etal></person-group><article-title>Outdoor temperature, blood pressure, and cardiovascular disease mortality among 23 000 individuals with diagnosed cardiovascular diseases from China</article-title>. <source>Eur Heart J</source><year>2015</year>;<volume>36</volume>:<fpage>1178</fpage>–<lpage>85</lpage>. <pub-id pub-id-type="doi">10.1093/eurheartj/ehv023</pub-id>
+<pub-id pub-id-type="pmid">25690792</pub-id></mixed-citation>
+              </ref>
+              <ref id="R6">
+                <label>6.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>Sans</surname><given-names>S</given-names></name>, <name name-style="western"><surname>Salomaa</surname><given-names>V</given-names></name>, <etal>et al</etal></person-group><article-title>The effect of temperature on systolic blood pressure</article-title>. <source>Blood Press Monit</source><year>2007</year>;<volume>12</volume>:<fpage>195</fpage>–<lpage>203</lpage>. <pub-id pub-id-type="doi">10.1097/MBP.0b013e3280b083f4</pub-id>
+<pub-id pub-id-type="pmid">17496471</pub-id></mixed-citation>
+              </ref>
+              <ref id="R7">
+                <label>7.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Budd</surname><given-names>GM</given-names></name>, <name name-style="western"><surname>Warhaft</surname><given-names>N</given-names></name></person-group><article-title>Body temperature, shivering, blood pressure and heart rate during a standard cold stress in Australia and Antarctica</article-title>. <source>J Physiol</source><year>1966</year>;<volume>186</volume>:<fpage>216</fpage>–<lpage>32</lpage>. <pub-id pub-id-type="doi">10.1113/jphysiol.1966.sp008030</pub-id>
+<pub-id pub-id-type="pmid">5914255</pub-id></mixed-citation>
+              </ref>
+              <ref id="R8">
+                <label>8.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Keatinge</surname><given-names>WR</given-names></name>, <name name-style="western"><surname>Coleshaw</surname><given-names>SR</given-names></name>, <name name-style="western"><surname>Cotter</surname><given-names>F</given-names></name>, <etal>et al</etal></person-group><article-title>Increases in platelet and red cell counts, blood viscosity, and arterial pressure during mild surface cooling: factors in mortality from coronary and cerebral thrombosis in winter</article-title>. <source>Br Med J</source><year>1984</year>;<volume>289</volume>:<fpage>1405</fpage>–<lpage>8</lpage>. <pub-id pub-id-type="doi">10.1136/bmj.289.6456.1405</pub-id>
+<pub-id pub-id-type="pmid">6437575</pub-id></mixed-citation>
+              </ref>
+              <ref id="R9">
+                <label>9.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Neild</surname><given-names>PJ</given-names></name>, <name name-style="western"><surname>Syndercombe-Court</surname><given-names>D</given-names></name>, <name name-style="western"><surname>Keatinge</surname><given-names>WR</given-names></name>, <etal>et al</etal></person-group><article-title>Cold-induced increases in erythrocyte count, plasma cholesterol and plasma fibrinogen of elderly people without a comparable rise in protein C or factor X</article-title>. <source>Clin Sci</source><year>1994</year>;<volume>86</volume>:<fpage>43</fpage>–<lpage>8</lpage>. <pub-id pub-id-type="doi">10.1042/cs0860043</pub-id>
+<pub-id pub-id-type="pmid">8306550</pub-id></mixed-citation>
+              </ref>
+              <ref id="R10">
+                <label>10.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Cinar</surname><given-names>Y</given-names></name>, <name name-style="western"><surname>Senyol</surname><given-names>AM</given-names></name>, <name name-style="western"><surname>Duman</surname><given-names>K</given-names></name></person-group><article-title>Blood viscosity and blood pressure: role of temperature and hyperglycemia</article-title>. <source>Am J Hypertens</source><year>2001</year>;<volume>14</volume>:<fpage>433</fpage>–<lpage>8</lpage>. <pub-id pub-id-type="doi">10.1016/S0895-7061(00)01260-7</pub-id>
+<pub-id pub-id-type="pmid">11368464</pub-id></mixed-citation>
+              </ref>
+              <ref id="R11">
+                <label>11.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Halonen</surname><given-names>JI</given-names></name>, <name name-style="western"><surname>Zanobetti</surname><given-names>A</given-names></name>, <name name-style="western"><surname>Sparrow</surname><given-names>D</given-names></name>, <etal>et al</etal></person-group><article-title>Associations between outdoor temperature and markers of inflammation: a cohort study</article-title>. <source>Environ Health</source><year>2010</year>;<volume>9</volume>:<fpage>42</fpage><pub-id pub-id-type="doi">10.1186/1476-069X-9-42</pub-id><pub-id pub-id-type="pmid">20653951</pub-id></mixed-citation>
+              </ref>
+              <ref id="R12">
+                <label>12.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Chapman</surname><given-names>R</given-names></name>, <name name-style="western"><surname>Howden-Chapman</surname><given-names>P</given-names></name>, <name name-style="western"><surname>Viggers</surname><given-names>H</given-names></name>, <etal>et al</etal></person-group><article-title>Retrofitting houses with insulation: a cost-benefit analysis of a randomised community trial</article-title>. <source>J Epidemiol Community Health</source><year>2009</year>;<volume>63</volume>:<fpage>271</fpage>–<lpage>7</lpage>. <pub-id pub-id-type="doi">10.1136/jech.2007.070037</pub-id>
+<pub-id pub-id-type="pmid">19299400</pub-id></mixed-citation>
+              </ref>
+              <ref id="R13">
+                <label>13.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Lloyd</surname><given-names>EL</given-names></name>, <name name-style="western"><surname>McCormack</surname><given-names>C</given-names></name>, <name name-style="western"><surname>McKeever</surname><given-names>M</given-names></name>, <etal>et al</etal></person-group><article-title>The effect of improving the thermal quality of cold housing on blood pressure and general health: a research note</article-title>. <source>J Epidemiol Community Health</source><year>2008</year>;<volume>62</volume>:<fpage>793</fpage>–<lpage>7</lpage>. <pub-id pub-id-type="doi">10.1136/jech.2007.067835</pub-id>
+<pub-id pub-id-type="pmid">18701729</pub-id></mixed-citation>
+              </ref>
+              <ref id="R14">
+                <label>14.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Saeki</surname><given-names>K</given-names></name>, <name name-style="western"><surname>Obayashi</surname><given-names>K</given-names></name>, <name name-style="western"><surname>Iwamoto</surname><given-names>J</given-names></name>, <etal>et al</etal></person-group><article-title>Influence of room heating on ambulatory blood pressure in winter: a randomised controlled study</article-title>. <source>J Epidemiol Community Health</source><year>2013</year>;<volume>67</volume>:<fpage>484</fpage>–<lpage>90</lpage>. <pub-id pub-id-type="doi">10.1136/jech-2012-201883</pub-id>
+<pub-id pub-id-type="pmid">23447647</pub-id></mixed-citation>
+              </ref>
+              <ref id="R15">
+                <label>15.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>Lucas</surname><given-names>M</given-names></name>, <name name-style="western"><surname>Platts</surname><given-names>D</given-names></name>, <etal>et al</etal></person-group><article-title>The benefits of thermal clothing during winter in patients with heart failure: a pilot randomised controlled trial</article-title>. <source>BMJ Open</source><year>2013</year>;<volume>4</volume>:<fpage>e002799</fpage><pub-id pub-id-type="doi">10.1136/bmjopen-2013-002799</pub-id></mixed-citation>
+              </ref>
+              <ref id="R16">
+                <label>16.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Milner</surname><given-names>J</given-names></name>, <name name-style="western"><surname>Chalabi</surname><given-names>Z</given-names></name>, <name name-style="western"><surname>Wilkinson</surname><given-names>P</given-names></name>, <etal>et al</etal></person-group><source>Evidence review and economic analysis of excess winter deaths. Review 2: Interventions and economic studies</source>. <publisher-loc>London: National Institute for Health and Care Excellence (NICE)</publisher-loc>, <year>2014</year>.</mixed-citation>
+              </ref>
+              <ref id="R17">
+                <label>17.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>de Looper</surname><given-names>M</given-names></name>, <name name-style="western"><surname>Fraser</surname><given-names>JF</given-names></name></person-group><article-title>The seasonality in heart failure deaths and total cardiovascular deaths</article-title>. <source>Aust N Z J Public Health</source><year>2008</year>;<volume>32</volume>:<fpage>408</fpage>–<lpage>13</lpage>. <pub-id pub-id-type="doi">10.1111/j.1753-6405.2008.00270.x</pub-id>
+<pub-id pub-id-type="pmid">18959541</pub-id></mixed-citation>
+              </ref>
+              <ref id="R18">
+                <label>18.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Team</surname><given-names>RC</given-names></name></person-group><article-title>R: A language and environment for statistical computing. R Foundation for Statistical Computing</article-title>. <source>Vienna, Austria</source><year>2016</year>.</mixed-citation>
+              </ref>
+              <ref id="R19">
+                <label>19.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Snow</surname><given-names>G</given-names></name></person-group><source>blockrand: Randomization for block random clinical trials</source>, <year>2013</year>.</mixed-citation>
+              </ref>
+              <ref id="R20">
+                <label>20.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Harris</surname><given-names>PA</given-names></name>, <name name-style="western"><surname>Taylor</surname><given-names>R</given-names></name>, <name name-style="western"><surname>Thielke</surname><given-names>R</given-names></name>, <etal>et al</etal></person-group><article-title>Research electronic data capture (REDCap)--a metadata-driven methodology and workflow process for providing translational research informatics support</article-title>. <source>J Biomed Inform</source><year>2009</year>;<volume>42</volume>:<fpage>377</fpage>–<lpage>81</lpage>. <pub-id pub-id-type="doi">10.1016/j.jbi.2008.08.010</pub-id>
+<pub-id pub-id-type="pmid">18929686</pub-id></mixed-citation>
+              </ref>
+              <ref id="R21">
+                <label>21.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Barnett</surname><given-names>A</given-names></name>, <name name-style="western"><surname>Stewart</surname><given-names>I</given-names></name>, <name name-style="western"><surname>Platts</surname><given-names>D</given-names></name>, <etal>et al</etal></person-group><source><italic toggle="yes">Using thermal clothing to reduce heart failure morbidity during winter:protocol for a randomised controlled trial</italic> QUT eprints</source>, <year>2016</year>.</mixed-citation>
+              </ref>
+              <ref id="R22">
+                <label>22.</label>
+                <mixed-citation publication-type="book"><collab>International Organization for Standardization</collab>. <source>Ergonomics of the thermal environment -- Estimation of thermal insulation and water vapour resistance of a clothing ensemble</source>, <year>2007</year>.</mixed-citation>
+              </ref>
+              <ref id="R23">
+                <label>23.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Viney</surname><given-names>R</given-names></name>, <name name-style="western"><surname>Norman</surname><given-names>R</given-names></name>, <name name-style="western"><surname>King</surname><given-names>MT</given-names></name>, <etal>et al</etal></person-group><article-title>Time trade-off derived EQ-5D weights for Australia</article-title>. <source>Value Health</source><year>2011</year>;<volume>14</volume>:<fpage>928</fpage>–<lpage>36</lpage>. <pub-id pub-id-type="doi">10.1016/j.jval.2011.04.009</pub-id>
+<pub-id pub-id-type="pmid">21914515</pub-id></mixed-citation>
+              </ref>
+              <ref id="R24">
+                <label>24.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Buysse</surname><given-names>DJ</given-names></name>, <name name-style="western"><surname>Reynolds</surname><given-names>CF</given-names></name>, <name name-style="western"><surname>Monk</surname><given-names>TH</given-names></name>, <etal>et al</etal></person-group><article-title>The Pittsburgh Sleep Quality Index: a new instrument for psychiatric practice and research</article-title>. <source>Psychiatry Res</source><year>1989</year>;<volume>28</volume>:<fpage>193</fpage>–<lpage>213</lpage>. <pub-id pub-id-type="doi">10.1016/0165-1781(89)90047-4</pub-id>
+<pub-id pub-id-type="pmid">2748771</pub-id></mixed-citation>
+              </ref>
+              <ref id="R25">
+                <label>25.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Efron</surname><given-names>B</given-names></name>, <name name-style="western"><surname>Tibshirani</surname><given-names>RJ</given-names></name></person-group><source> An Introduction to the Bootstrap</source>. <publisher-loc>Taylor &amp; Francis</publisher-loc>, <year>1994</year>.</mixed-citation>
+              </ref>
+              <ref id="R26">
+                <label>26.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>van der Pols</surname><given-names>JC</given-names></name>, <name name-style="western"><surname>Dobson</surname><given-names>AJ</given-names></name></person-group><article-title>Regression to the mean: what it is and how to deal with it</article-title>. <source>Int J Epidemiol</source><year>2005</year>;<volume>34</volume>:<fpage>215</fpage>–<lpage>20</lpage>. <pub-id pub-id-type="doi">10.1093/ije/dyh299</pub-id>
+<pub-id pub-id-type="pmid">15333621</pub-id></mixed-citation>
+              </ref>
+              <ref id="R27">
+                <label>27.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Lepage</surname><given-names>B</given-names></name>, <name name-style="western"><surname>Lamy</surname><given-names>S</given-names></name>, <name name-style="western"><surname>Dedieu</surname><given-names>D</given-names></name>, <etal>et al</etal></person-group><article-title>Estimating the causal effect of an exposure on change from baseline using directed acyclic graphs and path analysis</article-title>. <source>Epidemiology</source><year>2015</year>;<volume>26</volume>:<fpage>122</fpage>–<lpage>9</lpage>. <pub-id pub-id-type="doi">10.1097/EDE.0000000000000192</pub-id>
+<pub-id pub-id-type="pmid">25401453</pub-id></mixed-citation>
+              </ref>
+              <ref id="R28">
+                <label>28.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Sedgwick</surname><given-names>P</given-names></name></person-group><article-title>Intention to treat analysis versus per protocol analysis of trial data</article-title>. <source>BMJ</source><year>2015</year>;<volume>350</volume>:<fpage>h681</fpage><pub-id pub-id-type="doi">10.1136/bmj.h681</pub-id><pub-id pub-id-type="pmid">25663096</pub-id></mixed-citation>
+              </ref>
+              <ref id="R29">
+                <label>29.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Lumley</surname><given-names>T</given-names></name></person-group><source> mitools: Tools for multiple imputation of missing data</source>, <year>2014</year>.</mixed-citation>
+              </ref>
+              <ref id="R30">
+                <label>30.</label>
+                <mixed-citation publication-type="book"><person-group person-group-type="author"><name name-style="western"><surname>Katiyo</surname><given-names>S</given-names></name>, <name name-style="western"><surname>Dorey</surname><given-names>S</given-names></name>, <name name-style="western"><surname>Bone</surname><given-names>A</given-names></name></person-group><source>The Cold Weather Plan for England. Protecting health and reducing harm from cold weather</source>. <publisher-loc>Wellington House, London</publisher-loc>: <publisher-name>Public Health England</publisher-name>, <year>2015</year>.</mixed-citation>
+              </ref>
+              <ref id="R31">
+                <label>31.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Page</surname><given-names>K</given-names></name>, <name name-style="western"><surname>Barnett</surname><given-names>AG</given-names></name>, <name name-style="western"><surname>Graves</surname><given-names>N</given-names></name></person-group><article-title>What is a hospital bed day worth? A contingent valuation study of hospital Chief Executive Officers</article-title>. <source>BMC Health Serv Res</source><year>2017</year>;<volume>17</volume>:<fpage>137</fpage><pub-id pub-id-type="doi">10.1186/s12913-017-2079-5</pub-id><pub-id pub-id-type="pmid">28196489</pub-id></mixed-citation>
+              </ref>
+              <ref id="R32">
+                <label>32.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Day</surname><given-names>R</given-names></name>, <name name-style="western"><surname>Hitchings</surname><given-names>R</given-names></name></person-group><article-title>’Only old ladies would do that': age stigma and older people’s strategies for dealing with winter cold</article-title>. <source>Health Place</source><year>2011</year>;<volume>17</volume>:<fpage>885</fpage>–<lpage>94</lpage>. <pub-id pub-id-type="doi">10.1016/j.healthplace.2011.04.011</pub-id>
+<pub-id pub-id-type="pmid">21606000</pub-id></mixed-citation>
+              </ref>
+              <ref id="R33">
+                <label>33.</label>
+                <mixed-citation publication-type="journal"><person-group person-group-type="author"><name name-style="western"><surname>Moriske</surname><given-names>HJ</given-names></name>, <name name-style="western"><surname>Drews</surname><given-names>M</given-names></name>, <name name-style="western"><surname>Ebert</surname><given-names>G</given-names></name>, <etal>et al</etal></person-group><article-title>Indoor air pollution by different heating systems: coal burning, open fireplace and central heating</article-title>. <source>Toxicol Lett</source><year>1996</year>;<volume>88</volume>:<fpage>349</fpage>–<lpage>54</lpage>. <pub-id pub-id-type="doi">10.1016/0378-4274(96)03760-5</pub-id>
+<pub-id pub-id-type="pmid">8920759</pub-id></mixed-citation>
+              </ref>
+            </ref-list>
+          </back>
+        </article>
+      </metadata>
+    </record>
+  </GetRecord>
+</OAI-PMH>

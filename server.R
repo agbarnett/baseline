@@ -166,12 +166,89 @@ shinyServer(function(input, output) {
  
   # download the table data extracted from the XML file from PubMed Central
   output$download <- downloadHandler(
-    filename = function(){paste('table_data_', input$pmcid, '.csv', sep='')},  # add PMCID to filename
+    filename = function(){paste('table_data_', input$pmcid, '.xlsx', sep='')},  # add PMCID to Excel filename
     content = function(fname){
       inPMCID <- input$pmcid
       if (inPMCID==''){table = NULL} # if no PMCID
+      # long table
       table =  tstats()$original_table
-      write.csv(x = table, file = fname, quote = FALSE, row.names = FALSE)
+      ## make long table into wide format
+      # continuous
+      tab_continuous = filter(table, statistic =='continuous') 
+      t1 = filter(tab_continuous, column == 1) %>%
+        select(row, sample_size, stat1, stat2) %>%
+        rename('n1' = 'sample_size',
+               'mean1' = 'stat1',
+               'sd1' = 'stat2')
+      t2 = filter(tab_continuous, column == 2) %>%
+        select(row, sample_size, stat1, stat2) %>%
+        rename('n2' = 'sample_size',
+               'mean2' = 'stat1',
+               'sd2' = 'stat2')
+      continuous_stats = full_join(t1, t2, by='row') %>%
+        rename('Name' = 'row') %>%
+        mutate(Name = paste('C', Name, sep=''))
+      #
+      tab_percent = filter(table, statistic =='percent') 
+      t1 = filter(tab_percent, column == 1) %>%
+        select(row, stat1, sample_size) %>%
+        rename('n1' = 'stat1',
+               'N1' = 'sample_size')
+      t2 = filter(tab_percent, column == 2) %>%
+        select(row, stat1, sample_size) %>%
+        rename('n2' = 'stat1',
+               'N2' = 'sample_size')
+      percent_stats = full_join(t1, t2, by='row') %>%
+        rename('Name' = 'row') %>%
+        mutate(Name = paste('P', Name, sep=''))
+      # output to Excel
+      yellow <- createStyle(fontColour = "black", fgFill = "#FFFF00") # colours to match template
+      green <- createStyle(fontColour = "black", fgFill = "#C6E0B4")
+      wb = createWorkbook(creator='Adrian Barnett')
+      addWorksheet(wb, sheetName = "long")
+      addWorksheet(wb, sheetName = "wide")
+      freezePane(wb, sheet = 1, firstRow = TRUE) ## freeze first column
+      writeDataTable(wb, sheet = 1, x = table,
+                     colNames = TRUE, rowNames = FALSE)
+      text = 'Excel data in wide format, can be used in the "Option 2" upload on the "baseline" shiny page'
+      writeData(wb, sheet = 2, startRow = 1, x = text)
+      text = 'Only enter values in the yellow cells, green cells are optional. Add more yellow cells if there are more rows in the table. Do not change any other cells. Summary statistics that are medians cannot be used.'
+      writeData(wb, sheet = 2, startRow = 2, x = text)
+      text = 'Continuous variables, group sample size (N), mean and standard deviation'
+      writeData(wb, sheet = 2, startRow = 3, x = text)
+      writeData(wb, sheet = 2, startRow = 4, startCol = 1, x = 'Name')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 2, x = 'N')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 3, x = 'Mean')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 4, x = 'SD')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 5, x = 'N')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 6, x = 'Mean')
+      writeData(wb, sheet = 2, startRow = 4, startCol = 7, x = 'SD ')
+      if(nrow(continuous_stats) > 0){
+        writeData(wb, sheet = 2, startRow = 5, x = continuous_stats,
+                     colNames = FALSE, rowNames = FALSE)
+        rows = 5:(5+nrow(continuous_stats)-1)
+        addStyle(wb, sheet =2, rows = rows, cols=2:7, gridExpand = TRUE, style = yellow)
+        addStyle(wb, sheet =2, rows = rows, cols=1, gridExpand = TRUE, style = green)
+      }
+      text = 'Numbers or percents, numerator (n) and denominator (N).'
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 2, x = text)
+      # add percents
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 1, x = 'Name')
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 2, x = 'n')
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 3, x = 'N')
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 4, x = 'n')
+      writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 5, x = 'N')
+      if(nrow(percent_stats) > 0){
+        writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 4, x = percent_stats,
+                     colNames = FALSE, rowNames = FALSE)
+        start = 3 + nrow(continuous_stats) + 4
+        rows = start:(start+nrow(percent_stats)-1)
+        addStyle(wb, sheet =2, rows = rows, cols=1, gridExpand = TRUE, style = green)
+        addStyle(wb, sheet =2, rows = rows, cols=2:5, gridExpand = TRUE, style = yellow)
+      }
+      #
+      saveWorkbook(wb, fname, overwrite = TRUE)
+      
     }
   )
   

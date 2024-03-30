@@ -208,13 +208,19 @@ if(ncol(table1) <= 2){return(stop_one_column())}
 table1 = mutate(table1, across(everything(), flag_median_function))
 
 ## combine columns if there are columns of numbers, followed by columns in brackets
+## update, do not combine if second column has two statistics
 columns = as.matrix(table1)[,-1] # without first column
 bcounts = colSums(apply(columns, FUN=str_count, MARGIN=2, pattern='\\('),na.rm = TRUE)
 proportions = bcounts / nrow(columns)
 n.cols = ncol(columns)
-no_brackets = proportions < 0.05 | bcounts<=1 # changed March 2023 due to 
+no_brackets = proportions < 0.05 | bcounts <= 1 # changed March 2023 due to 
 with_brackets = proportions > 0.75
-index = which(no_brackets[1:(n.cols-1)] + with_brackets[2:n.cols] == 2) # any columns of non-brackets followed by brackets
+# update
+two_stats_count = colSums(apply(columns, FUN=str_count, MARGIN=2, pattern='[0-9] ?\\(.?[0-9]'),na.rm = TRUE)
+proportions_two_stats = two_stats_count / nrow(columns)
+with_two_stats = proportions_two_stats > 0.75
+#
+index = which((no_brackets[1:(n.cols-1)] + with_brackets[2:n.cols] ==2) & with_two_stats[2:n.cols] == FALSE) # any columns of non-brackets followed by brackets
 if(length(index) > 0){ # combine
   index = as.numeric(index) + 1 + 1 # plus one because of missing first column; plus another to move to right column
   tnames = names(table1)
@@ -358,11 +364,19 @@ if(any(test_cols) & length(test_cols)>2){ # if 2 or fewer columns then will be r
   if(any(n_counts) == TRUE){ # only proceed if 85% met
     ## put numbers in header for sample size detection, only if there's not any `n=` in header already
     if(!any(str_detect(pattern='n=|n =',names(table1)))){
-      # get average sample size
+      # get max sample size (update March 2024 - changed to max, assume that's greatest sample size)
       numbers = matrix(as.numeric(M), ncol = ncol(M)) # ignore NA warnings
-      nmean = round(colMeans(numbers, na.rm=TRUE))
+      nmean = round(colMeans(numbers, na.rm=TRUE)) # means
+      nmax = rep(NA, ncol(numbers))
+      for (c in 1:ncol(numbers)){
+        nmax[c] = max(numbers[,c], na.rm=TRUE) # calculate maximum, can be useful sample size as assuming other n's include item missing data
+      }
+      # use maximum if there's not a massive gap between max and mean
+      small_gap = (nmax - nmean)/nmean < 0.1 # under 10%
+      n_to_use = nmean # start with mean ... 
+      if(all(small_gap)){n_to_use = nmax} # ... use max if gaps are small
       # find first row with numbers
-      n_text= paste('n=', nmean, sep='') # make detectable text
+      n_text= paste('n=', n_to_use, sep='') # make detectable text
       index = which(test_cols)+1 # assume it is next column along
       index = index[index<=ncol(table1)]
       names(table1)[index] = paste(names(table1)[index], n_text)

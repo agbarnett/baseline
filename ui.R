@@ -25,7 +25,7 @@ shinyUI(fluidPage(
                       value = '',
                       label = "Option 1: Enter PMCID",
 					  placeholder = 'PMCxxxxxxx'),
-					  #PMC5640030
+			h5('example: PMC5640030',style="display:inline-block"), # add example
 
             # Input: Select a file ----
             fileInput(inputId ="excel.file", 
