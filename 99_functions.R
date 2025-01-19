@@ -1,62 +1,148 @@
 # 99_functions.R
 # functions for shiny app to test baseline tables
-# January 2022
+# January 2025
 
-# read and process Excel file
+
+# read and process Excel file (version for multiple columns)
 my_read_excel = function(input_file){
+  warning = NULL
   # read in the file and assign dummy names (two groups only so far)
   raw = read_excel(path = input_file, sheet=1, col_names = FALSE, skip=2)
   names(raw) = paste('v', 1:ncol(raw), sep='')
+  # calculate the number of groups
+  index = which(raw$v1 == 'Name') # find name columns
+  g1 = sum(raw[index[1],] == 'Mean', na.rm = TRUE)
+  g2 = sum(raw[index[2],] == 'N', na.rm = TRUE)
+  if(g1 != g2){warning = paste(warning, 'Number of groups for continuous and categorical data do not match.\n', sep='')}
+  n_groups = g1
+  
   # find percent and continuous
   row_cont = which(str_detect(string=raw$v1, pattern='Continuous variables'))[1]
   row_percent = which(str_detect(string=raw$v1, pattern='Numbers or percents'))[1]
-  # extract continuous summary stats
-  continuous = raw[(row_cont+2):(row_percent-1),] %>%
-    mutate(v2 = as.numeric(v2),
-           v3 = as.numeric(v3),
-           v4 = as.numeric(v4),
-           v5 = as.numeric(v5),
-           v6 = as.numeric(v6),
-           v7 = as.numeric(v7)) %>%
-    filter(!is.na(v2),
-           !is.na(v3),
-           !is.na(v4),
-           !is.na(v5),
-           !is.na(v6),
-           !is.na(v7)) %>%
-    rename('n1' = 'v2',
-           'm1' = 'v3',
-           'sd1' = 'v4',
-           'n2' = 'v5',
-           'm2' = 'v6',
-           'sd2' = 'v7')
-  # extract percent summary stats
-  percents = raw[(row_percent+2):nrow(raw),] %>%
-    mutate(v2 = as.numeric(v2),
-           v3 = as.numeric(v3),
-           v4 = as.numeric(v4),
-           v5 = as.numeric(v5)) %>%
-    filter(!is.na(v2),
-           !is.na(v3),
-           !is.na(v4),
-           !is.na(v5)) %>%
-    rename('n1' = 'v2',
-           'N1' = 'v3',
-           'n2' = 'v4',
-           'N2' = 'v5')
+  # check there's some continuous and percent data
+  if(str_detect(raw$v1[row_cont+2], 'Numbers or percents')){row_cont = NULL}
+  if(is.na(raw$v1[row_percent+2])){row_percent = NULL}
   
-  # null if no rows
-  if(nrow(continuous)==0){continuous = NULL}
-  if(nrow(percents)==0){percents = NULL}
+  # extract continuous summary stats
+  continuous = percent = NULL
+  if(!is.null(row_cont)){
+    continuous = raw[(row_cont+2):(row_percent-1),] %>% # extract rows
+      mutate_at(vars(!matches("^v1$")), as.numeric) %>% # change every variable but first column to a number 
+      filter_all(all_vars(!is.na(.)))  # all data must be available
+    # names based on number of groups
+    cont_names = paste(rep(c('n','m','sd'),n_groups), rep(1:n_groups,each=3), sep='')
+    names(continuous) = c('v1', cont_names)
+  }
+  
+  # extract percent summary stats
+  if(!is.null(row_percent)){
+    p_names = paste('v',2:((n_groups*2)+1), sep='') # need this because continuous variables above include more columns
+    percents = raw[(row_percent+2):nrow(raw),] %>%
+      mutate_at(vars(!matches("^v1$")), as.numeric) %>% # change every variable but first column to a number 
+      filter_at(vars(all_of(p_names)), all_vars(!is.na(.))) # all data must be available
+    # names based on number of groups
+    cat_names = paste(rep(c('n','N'),n_groups), rep(1:n_groups,each=2), sep='')
+    names(percents) = c('v1', cat_names)
+    percents = select(percents, matches('^v|^n|^N')) # remove blank columns
+  }
+  
+  # convert percents to long format
+  percents_long = NULL
+  if(!is.null(percents)){
+    col1 = select(percents, 'v1', starts_with('n', ignore.case = FALSE)) %>%
+      pivot_longer(-'v1', values_to = 'stat1') %>%
+      mutate(column = as.numeric(str_remove(name,'n'))) %>%
+      select(-name)
+    if(any(col1$stat1 - round(col1$stat1) !=0)){warning = paste(warning, 'Non-integer numerators.\n', sep='')}
+    col2 = select(percents, 'v1', starts_with('N', ignore.case = FALSE)) %>%
+      pivot_longer(-'v1', values_to = 'sample_size') %>%
+      mutate(column = as.numeric(str_remove(name,'N'))) %>%
+      select(-name)
+    percents_long = full_join(col1, col2, by=c('v1','column')) %>%
+      mutate(row = as.numeric(as.factor(v1)), # row numbers will now be alphabetical
+             stat2 = 100*stat1/sample_size,
+             statistic = 'percent') 
+    max.percent = max(percents_long$row) # highest row number in percentages
+  }
+  
+  # convert continuous to long format
+  continuous_long = NULL
+  if(!is.null(continuous)){
+    ccol1 = select(continuous, 'v1', starts_with('n', ignore.case = FALSE)) %>%
+      pivot_longer(-'v1', values_to = 'sample_size') %>%
+      mutate(column = as.numeric(str_remove(name,'n'))) %>%
+      select(-name)
+    ccol2 = select(continuous, 'v1', starts_with('m', ignore.case = FALSE)) %>%
+      pivot_longer(-'v1', values_to = 'stat1') %>%
+      mutate(column = as.numeric(str_remove(name,'m'))) %>%
+      select(-name)
+    ccol3 = select(continuous, 'v1', starts_with('sd', ignore.case = FALSE)) %>%
+      pivot_longer(-'v1', values_to = 'stat2') %>%
+      mutate(column = as.numeric(str_remove(name,'sd'))) %>%
+      select(-name)
+    continuous_long = full_join(ccol1, full_join(ccol2, ccol3, by=c('v1','column')), by=c('v1','column')) %>%
+      mutate(row = as.numeric(as.factor(v1)), # row numbers will now be alphabetical
+             row = row + max.percent, # add 
+             statistic = 'continuous')
+  }
+  
+  # concatenate
+  long = bind_rows(percents_long, continuous_long) %>%
+    mutate(pmcid = 99) # dummy for later function
+  # warnings
+  if(any(ccol3$stat2<=0)){warning = paste(warning, 'Negative or zero standard deviations.\n', sep='')}
+  if(any(long$sample_size - round(long$sample_size) !=0)){warning = cat(warning, 'Non-integer sample sizes.\n')}
   
   # return
   data = list()
-  data$continuous = continuous
-  data$percents = percents
+  data$data = long
+  data$reason = warning # called reason to match other structure
   return(data)
 }
 
+
+## Make simulated data that copies the input data (summary statistics) but follows the null hypothesis of good randomisation
+make_sim = function(indata){
+  
+  simp = simc = NULL
+  # simulate continuous
+  if(any(indata$statistic == 'continuous')){
+    simc = filter(indata, statistic == 'continuous') %>%
+      #mutate(row=1:n()) %>%
+      group_by(row) %>%
+      mutate(m = (m1+m2)/2,
+             s = (sd1+sd2)/2,
+             n = n1 + n2,
+             sem = s / sqrt(n),
+             m1 = rnorm(n=1, mean=m, sd=sem),
+             m2 = rnorm(n=1, mean=m, sd=sem),
+             sd1 = s,
+             sd2 = s) %>%
+      ungroup() %>%
+      select(row, n1, m1, sd1, n2, m2, sd2) # removed v1
+  }
+  
+  # simulate percentages
+  if(any(indata$statistic == 'percent')){
+    simp = filter(indata, statistic == 'percent') %>%
+      #mutate(row=1:n()) %>%
+      group_by(row) %>%
+      mutate(p = (n1+n2) / (N1 + N2),
+             n1 = rbinom(n = 1, p=p, size=N1),
+             n2 = rbinom(n = 1, p=p, size=N2)) %>%
+      ungroup() %>%
+      select(row, row, n1, N1, n2, N2)
+  }
+  
+  sim_data = list()
+  sim_data$continuous = simc
+  sim_data$percents = simp
+  return(sim_data)
+}
+
+
 ## t-test from summary stats, from https://stats.stackexchange.com/questions/30394/how-to-perform-two-sample-t-tests-in-r-by-inputting-sample-statistics-rather-tha
+# for two groups
 # m1, m2: the sample means
 # s1, s2: the sample standard deviations
 # n1, n2: the sample sizes
@@ -90,33 +176,8 @@ t.test2 <- function(mean, sd, n, equal.variance=TRUE, return_what = 'difference'
 }
 
 
-# approximation of two-sample t-test for binomial data (see D'Agostino 1998)
-t.test2.binomial <- function(a, b, c, d, return_what = 't')
-{
-  # fix for zero counts
-  if(a==0){a=0.5}
-  if(b==0){b=0.5}
-  #
-  m = a + c
-  n = b + d
-  p1 = a/m
-  p2 = b/n
-  var1 = p1*(1-p1) # variance
-  var2 = p2*(1-p2)
-  pooled_var = ((m-1)*var1 + (n-1)*var2) / (m+n-2) # pooled variance
-  denom = sqrt((1/m) + (1/n))
-  mdiff = p1 - p2 # mean difference
-  se = sqrt(pooled_var) * denom
-  t = mdiff / se
-  df <- m+n-2
-  p <- 2*pt(-abs(t), df)
-  if(return_what=='difference'){return(mdiff)}
-  if(return_what=='se'){return(se)}
-  if(return_what=='t'){return(t)}
-  if(return_what=='p'){return(p)}
-}
 
-# create t-statistics for continuous data
+## create t-statistics for continuous summary stats (assumes 2 groups)
 t.stats.continuous = function(indata){
   
   #
@@ -176,170 +237,7 @@ t.stats.percents = function(indata){
 }
 
 
-## function to run Bayesian model (winbugs version)
-run_bayes_test_winbugs = function(in_data,
-                                  MCMC = 1000,
-                                  thin = 3,
-                                  n.chains = 2,
-                                  debug = FALSE
-){
-  # prepare the data for Winbugs
-  N = nrow(in_data) # number of statistics
-  N_studies = length(unique(in_data$study)) # number of studies
-  bdata = list(N = N, 
-               mdiff = in_data$mdiff,
-               N_studies = N_studies, 
-               df = in_data$size - 1, # degrees of freedom
-               study = in_data$study, 
-               inv.sem2 = 1 / in_data$sem2) # inverse-variance
-  
-  ## initial values
-  # precision
-  mu.var = matrix(data=NA, ncol=2, nrow=N_studies) # start with NA
-  mu.var[,2] = 0.1 # small positive
-  #
-  inits = list(mu.var = mu.var, 
-               var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
-  inits = rep(list(inits), n.chains) # repeat per chains
-  
-  parms = c('var.flag','mu.var')
-  bugs = bugs(data=bdata, inits=inits, parameters=parms, model.file='bugs_model.txt', DIC=FALSE,
-              n.chains=n.chains, n.iter=MCMC*thin*2, n.thin=thin, bugs.seed=1234, debug=debug,
-              bugs.directory="c:/Program Files/WinBUGS14")
-  
-  # summary stats
-  stats = bugs$summary[, c(1,3,7)]
-  stats = data.frame(stats)
-  names(stats) = c('mean','lower','upper')
-  stats$var = row.names(stats)
-  # pick out results
-  p.flag = filter(stats, var=='var.flag[1]') %>% pull(mean)
-  mult =  filter(stats, var=='mu.var[1,2]')  %>%
-    mutate(mean = exp(mean),
-           lower = exp(lower),
-           upper = exp(upper))
-  
-  #
-  to.return = list()
-  to.return$p.flag = p.flag
-  to.return$mult = mult
-  return(to.return)
-} # end of function
 
-
-## function to run Bayesian model (nimble version)
-run_bayes_test = function(in_data,
-                          MCMC = 1000,
-                          p_prior = 0.5,
-                          thin = 3
-){
-  
-  # prepare the data for nimble (version with single study)
-  N = nrow(in_data) # number of statistics
-  constants = list(N = N, p_prior = p_prior)
-  #
-  data = list(mdiff = in_data$mdiff,
-              inv.sem2 = 1 / in_data$sem2, # inverse-variance
-              df = in_data$size - 1) # degrees of freedom
-
-  ## initial values
-  mu.var = rep(NA, 2)
-  mu.var[2] = 0.1 # small positive
-  #
-  inits = list(mu.var = mu.var, 
-               var.flag = 0)  # start all with no flag for mean or variance
-  
-  # model
-  baselineCode <- nimbleCode({
-    # Model
-    for(i in 1:N){
-      mdiff[i] ~ dt(0, tau[i], df[i])
-      tau[i] <- inv.sem2[i] * inv.var # precision
-    }
-    
-    # Priors
-    # spike-slab for inverse-variance
-    log(inv.var) <- mu.var[pick]
-    pick <- var.flag + 1
-    var.flag ~ dbern(p_prior) # 
-    mu.var[1] <- 0 # spike at zero (no change in precision)
-    mu.var[2] ~ dnorm(0, 0.1) # "slab"
-  })
-  
-  # make chains
-  nimbleMCMC_samples <- nimbleMCMC(code = baselineCode, 
-                                   constants = constants, 
-                                   data = data, 
-                                   inits = inits,
-                                   setSeed = 816,
-                                   thin = thin,
-                                   niter = MCMC*thin*2,
-                                   nburnin = MCMC*thin)
-  
-  # summary stats
-  means = colMeans(nimbleMCMC_samples)
-  lower = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.05)
-  upper = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.95)
-  stats = data.frame(var = colnames(nimbleMCMC_samples), mean = means, lower = lower, upper=upper)
-  row.names(stats) = NULL
-  
-  # pick out results
-  p.flag = filter(stats, var=='var.flag') %>% pull(mean)
-  mult =  filter(stats, var=='mu.var[2]')  %>%
-    mutate(mean = exp(mean),
-           lower = exp(lower),
-           upper = exp(upper))
-  
-  #
-  to.return = list()
-  to.return$p.flag = p.flag
-  to.return$mult = mult
-  return(to.return)
-} # end of function
-
-## Make simulated data that copies the input data but follows the null hypothesis of good randomisation
-make_sim = function(indata){
-  
-  simp = simc = NULL
-  # simulate continuous
-  if(is.null(indata$continuous) == FALSE){
-    simc = mutate(indata$continuous, row=1:n()) %>%
-      group_by(row) %>%
-      mutate(m = (m1+m2)/2,
-             s = (sd1+sd2)/2,
-             n = n1 + n2,
-             sem = s / sqrt(n),
-             m1 = rnorm(n=1, mean=m, sd=sem),
-             m2 = rnorm(n=1, mean=m, sd=sem),
-             sd1 = s,
-             sd2 = s) %>%
-      ungroup() %>%
-      select(v1, n1, m1, sd1, n2, m2, sd2)
-  }
-  
-  # simulate percentages
-  if(is.null(indata$percents) == FALSE){
-    simp = mutate(indata$percents, row=1:n()) %>%
-      group_by(row) %>%
-      mutate(p = (n1+n2) / (N1 + N2),
-             n1 = rbinom(n = 1, p=p, size=N1),
-             n2 = rbinom(n = 1, p=p, size=N2)) %>%
-      ungroup() %>%
-      select(v1, n1, N1, n2, N2)
-  }
-  
-  sim_data = list()
-  sim_data$continuous = simc
-  sim_data$percents = simp
-  return(sim_data)
-}
-
-# to replace missing with zero, used by 3_compare_algorithm_hand.Rmd
-replace_zero = function(x){replace_na(x, '0')}
-replace_zero_num = function(x){replace_na(x, 0)}
-
-# simple function used by 4_model.R
-is.this = function(x, i){sum(x==i)/length(x)}
 
 ## extract baseline tables, simplified version, removed pvalues_in_table
 baseline_table = function(webpage, # paper tables in xml format 
@@ -347,7 +245,7 @@ baseline_table = function(webpage, # paper tables in xml format
                           table_number = 1, 
                           footnote,
                           weight = 2) # weight feeds into statistics detect function
-  {
+{
   
   # maximum number of tables - probably no longer needed
   max_table = length(webpage %>% xml_nodes("table-wrap"))
@@ -365,7 +263,7 @@ baseline_table = function(webpage, # paper tables in xml format
     xml_text()
   footnote = paste(footnote, table_footnote)
   footnote = str_squish(str_replace_all(string=tolower(footnote), pattern="[^0-9|a-z|=|<|>|%| ]", ' '))  # remove all special characters to make matching below easier
-
+  
   # extract baseline table 
   table1 <- webpage %>%
     xml_nodes("table-wrap") %>%
@@ -412,7 +310,7 @@ baseline_table = function(webpage, # paper tables in xml format
   }
   ## remove rows that are almost identical to above
   table1 = remove_duplicate_rows(table1)
-    
+  
   ## remove odd characters and change to lower case - helps with searching below
   cnames = tolower(names(table1))
   cnames = gsub(cnames, pattern='(?=\\(\\d{1,}\\))', replacement='n=', perl=TRUE) # replace '(numbers)` with '(n=numbers)'
@@ -460,7 +358,7 @@ baseline_table = function(webpage, # paper tables in xml format
     these_letters = LETTERS[1:dcount]
     names(table1)[dindex] =  paste(these_letters, names(table1)[dindex], sep = '') 
   }
-
+  
   ## transpose badly formatted tables here (where results are in rows instead of columns)
   # if more columns than rows then assume transposed ...
   rows_columns = nrow(table1) < ncol(table1)
@@ -495,7 +393,7 @@ baseline_table = function(webpage, # paper tables in xml format
   }
   # neaten first column with labels
   table1 = mutate_at(table1, str_squish, .vars=1) # first column
-
+  
   ## if sample size in first two rows then add to header, using sample words matching only
   # or if any rows are the total
   to_check = tolower(data.frame(table1)[,1])
@@ -534,10 +432,10 @@ baseline_table = function(webpage, # paper tables in xml format
     # remove first or second row
     table1 = table1[-n_row,] 
   }
-    
+  
   ## stop if just one column
   if(ncol(table1) <= 2){return(stop_one_column())}
-
+  
   # combine first two to three columns if they are both mostly text (double label column)
   previous = ncol(table1)
   table1 = combine_cols(table1) # first two columns ...
@@ -546,11 +444,11 @@ baseline_table = function(webpage, # paper tables in xml format
   }
   ## stop if just one column
   if(ncol(table1) <= 2){return(stop_one_column())}
-
+  
   ## if "numbers (numbers - numbers)" in cells then flag median; do before plus/minus below
   #table1 = mutate_all(table1, flag_median_function) # caused occasional errors so changed to below ...
   table1 = mutate(table1, across(everything(), flag_median_function))
-
+  
   ## combine columns if there are columns of numbers, followed by columns in brackets
   columns = as.matrix(table1)[,-1] # without first column
   bcounts = colSums(apply(columns, FUN=str_count, MARGIN=2, pattern='\\('),na.rm = TRUE)
@@ -591,7 +489,7 @@ baseline_table = function(webpage, # paper tables in xml format
     mutate_all(add_space_function) %>% # add space before and after brackets to stop numbers getting compressed
     mutate_all(removeunicode) %>% # 
     mutate_all(string_remove_function)
-
+  
   ## drop any columns that are the total
   # also drop any columns that are labelled 'men' or 'women' as these are subgroups not randomised groups
   text_to_check = tolower(names(table1))
@@ -637,7 +535,7 @@ baseline_table = function(webpage, # paper tables in xml format
     to.return$table = NULL
     return(to.return) # stop here
   }
-    
+  
   ## remove columns that are test statistics,  
   test_cols1 = str_detect(string = names(table1), pattern=test_pattern) # check names
   test_cols2 = str_detect(string = table1[1,], pattern=test_pattern) # check first row
@@ -663,7 +561,7 @@ baseline_table = function(webpage, # paper tables in xml format
   }
   ## stop if just one column
   if(ncol(table1) <= 2){return(stop_one_column())}
-
+  
   ## combine statistics in neighbouring columns
   table1 = combine_columns(table1, stat1=c('mean','m'), stat2='sd') # assume single `m` for mean
   if(ncol(table1) <= 2){return(stop_one_column())} # stop if 1 column
@@ -746,7 +644,7 @@ baseline_table = function(webpage, # paper tables in xml format
   if(length(repeats) > 0){
     table1[repeats, 2:ncol] = '' # blank repeat cells
   }
-
+  
   ## what row do numbers/stats start on?
   numbers_start = numbers_start_function(table1)
   
@@ -777,7 +675,7 @@ baseline_table = function(webpage, # paper tables in xml format
   index = which(tab == ncol(no_header) - 1) # must be all columns
   rows_with_n = as.numeric(names(index))
   no_header = no_header[1:nrow(no_header) %in% rows_with_n == FALSE, ] # remove rows from table
-
+  
   ## find rows in the table that are just text as these are likely header rows (so just keep rows with some numbers)
   nums = matrix(data = rep(1:nrow(no_header), ncol(no_header)), ncol = ncol(no_header), nrow = nrow(no_header)) # make matrix of numbers
   vector_nums = as.vector(as.matrix(nums))
@@ -788,7 +686,7 @@ baseline_table = function(webpage, # paper tables in xml format
   prop_numbers[is.na(prop_numbers)] = 0
   matrix_prop = matrix(prop_numbers, ncol=ncol(no_header)) > 0.4 # more than 40% numbers
   rows_with_numbers = which(rowSums(matrix_prop) > 0)
-
+  
   ##### detect use of statistics for each row ####
   ## split table if there are multiple header rows (usually a second row mid-way down table)
   no_header = mutate(no_header, rrr = 1:n())
@@ -836,7 +734,7 @@ baseline_table = function(webpage, # paper tables in xml format
     stats_detect$columns_to_remove = any_remove
     # print(this_split) # for testing
   }
-
+  
   # remove p-value columns and record p-values in table ...
   actual_pvalues = NULL # 
   if(any(!is.na(stats_detect$columns_to_remove))){ # at least one not missing
@@ -852,7 +750,7 @@ baseline_table = function(webpage, # paper tables in xml format
     no_header = no_header[, -to_remove]
     #table_header = table_header[, -to_remove] # keep because of potential mis-alignment, used by sample_sizes_est function below
   }
-
+  
   # exclude if just one column (again), but this time with p-values
   if(ncol(no_header) <= 2){return(stop_one_column(presult=NULL, pvalues=TRUE))}
   
@@ -896,9 +794,9 @@ baseline_table = function(webpage, # paper tables in xml format
     mutate(
       rrr = as.numeric(as.factor(rrr)), # re-number rows
       stat1 = suppressWarnings(as.numeric(stat1)), # 
-           stat2 = suppressWarnings(as.numeric(stat2)),
-           stat3 = suppressWarnings(as.numeric(stat3)),
-           stat4 = suppressWarnings(as.numeric(stat4))) %>%
+      stat2 = suppressWarnings(as.numeric(stat2)),
+      stat3 = suppressWarnings(as.numeric(stat3)),
+      stat4 = suppressWarnings(as.numeric(stat4))) %>%
     filter(!is.na(stat1)) %>% # knock out missing cells
     rename('row' = 'rrr') # use more standard name
   
@@ -949,7 +847,7 @@ baseline_table = function(webpage, # paper tables in xml format
   # merge
   table = full_join(table, sample_sizes, by = 'column') %>% # add sample sizes from above
     filter(!is.na(sample_size)) # knock out missing sample size
-
+  
   # if top row of table is sample sizes then remove top row
   n_same = nrow(filter(table, row==1, stat1==sample_size))
   if(n_same == max(table$column)){ # if all statistics are the sample size
@@ -983,7 +881,7 @@ baseline_table = function(webpage, # paper tables in xml format
     }
   }
   if(re_number==TRUE){table = mutate(table, column = as.numeric(as.factor(column)))} # re-number to avoid gaps in column numbers
-
+  
   # return final results
   to.return = list()
   to.return$reason = NULL # no reason to exclude
@@ -1024,7 +922,7 @@ flag_median_function = function(x){
   # pattern is: number, optional space, bracket, number, optional number, optional dp, optional number, optional space, separator (using or), optional space, number, optional number, optional decimal point, optional number, close bracket
   # dashes look the same, but are different
   pattern = '[0-9]\\s?\\([0-9][0-9]?\\.?[0-9]?\\s?(to|\\p{Pd}|,)\\s?[0-9][0-9]?\\.?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?\\)'
-#  pattern = '[0-9]\\s?\\([0-9][0-9]?\\.?[0-9]?\\s?(to|-|–|–|–|–|–|–|,)\\s?[0-9][0-9]?\\.?[0-9]?\\)'
+  #  pattern = '[0-9]\\s?\\([0-9][0-9]?\\.?[0-9]?\\s?(to|-|–|–|–|–|–|–|,)\\s?[0-9][0-9]?\\.?[0-9]?\\)'
   index = str_detect(string=x, pattern=pattern) # 
   index[is.na(index)] = FALSE
   if(any(index) == TRUE){
@@ -1032,11 +930,11 @@ flag_median_function = function(x){
   }
   return(x)
 }
-  
+
 ## Mode (used by sample size)
 Mode <- function(x) {
- ux <- unique(x)
- ux[which.max(tabulate(match(x, ux)))]
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
 }
 
 ## function to extract sample size from column headers
@@ -1044,44 +942,44 @@ extract_n = function(intext){
   N = length(intext)
   ns = rep(NA, N)
   # tidy up text:
- intext[is.na(intext)] = '' # replace NAs
- intext = tolower(intext) # convert to lower text
- intext = str_replace_all(string = intext, pattern = '[^a-z|0-9|=| ]', replacement = ' ') # keep only these (remove lots of characters), replace with spaces because of things like "n:"
- intext = str_squish(intext)
- pattern = 'n\\s?=?\\s?[0-9][0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?' # find `n=number` with optional spaces
- # allow for multiple results and take last, e.g., PMC7028836
- locations = str_locate_all(string=intext, pattern=pattern)
- last = lapply(locations, tail, 1) # take last result in each list
- df = NULL
- for (l in 1:N){ # had to loop because some results have no rows
-   frame = data.frame(start=last[[l]][1], end=last[[l]][2])
-   df = bind_rows(df, frame)
- }
- # now extract using substring
- if(nrow(df)>0){
-  for (k in 1:nrow(df)){
-     ns[k] = as.numeric(str_replace(str_sub(intext[k], df$start[k], df$end[k]), pattern='n\\s?=?\\s?', replacement=''))
+  intext[is.na(intext)] = '' # replace NAs
+  intext = tolower(intext) # convert to lower text
+  intext = str_replace_all(string = intext, pattern = '[^a-z|0-9|=| ]', replacement = ' ') # keep only these (remove lots of characters), replace with spaces because of things like "n:"
+  intext = str_squish(intext)
+  pattern = 'n\\s?=?\\s?[0-9][0-9]?[0-9]?[0-9]?[0-9]?[0-9]?[0-9]?' # find `n=number` with optional spaces
+  # allow for multiple results and take last, e.g., PMC7028836
+  locations = str_locate_all(string=intext, pattern=pattern)
+  last = lapply(locations, tail, 1) # take last result in each list
+  df = NULL
+  for (l in 1:N){ # had to loop because some results have no rows
+    frame = data.frame(start=last[[l]][1], end=last[[l]][2])
+    df = bind_rows(df, frame)
   }
- }
- # alternative where cells are just numbers
- if(any(!is.na(ns)) == FALSE){ # if all missing
-  if(str_detect(intext[1], pattern = ' n$')){ # if column heading ends in `n`
-   ns = suppressWarnings(as.numeric(intext)) # turn off warning
+  # now extract using substring
+  if(nrow(df)>0){
+    for (k in 1:nrow(df)){
+      ns[k] = as.numeric(str_replace(str_sub(intext[k], df$start[k], df$end[k]), pattern='n\\s?=?\\s?', replacement=''))
+    }
   }
- }
- # add column number
- f = data.frame(column = 1:N, sample_size = ns) %>%
-  filter(!is.na(sample_size))
- return(f)
+  # alternative where cells are just numbers
+  if(any(!is.na(ns)) == FALSE){ # if all missing
+    if(str_detect(intext[1], pattern = ' n$')){ # if column heading ends in `n`
+      ns = suppressWarnings(as.numeric(intext)) # turn off warning
+    }
+  }
+  # add column number
+  f = data.frame(column = 1:N, sample_size = ns) %>%
+    filter(!is.na(sample_size))
+  return(f)
 }
 
 ## function to estimate sample sizes per group
 sample_sizes_est = function(table_header, # table header with column headings
-            processed_table, # statistics per row
-            first_rows) # first rows of table, can have totals
+                            processed_table, # statistics per row
+                            first_rows) # first rows of table, can have totals
 {
-
-# which row of the header has the n's
+  
+  # which row of the header has the n's
   n_row = 0
   if(nrow(table_header) > 0){
     n_row = rep(0, nrow(table_header))
@@ -1098,11 +996,11 @@ sample_sizes_est = function(table_header, # table header with column headings
   if(sum(n_row) == 0){ # use column headers if n's are not in table cells
     sample_sizes = extract_n(names(table_header))
   }
-
-# if this first step (above) has worked then end and return results
-if(nrow(sample_sizes) > 0){
- return(sample_sizes)
-}
+  
+  # if this first step (above) has worked then end and return results
+  if(nrow(sample_sizes) > 0){
+    return(sample_sizes)
+  }
   
   # if still nothing try first available row of stats ...
   first_rows = select(first_rows, -header) # 
@@ -1112,7 +1010,7 @@ if(nrow(sample_sizes) > 0){
   first_rows_nums$row = 1:nrow(first_rows_nums)
   any_n = reshape::melt(id.vars = 'row', data.frame(first_rows_nums), variable_name = "column") %>%
     mutate(value = str_squish(value),
-      n_detect = str_detect(string=value, pattern = sample_patterns)) %>%
+           n_detect = str_detect(string=value, pattern = sample_patterns)) %>%
     group_by(row) %>%
     summarise(sum = sum(n_detect)) %>%
     filter(sum >= 2) %>%
@@ -1123,7 +1021,7 @@ if(nrow(sample_sizes) > 0){
     nums = extract_n(select(first_rows_nums, -row)[any_n,])
     return(nums)
   }
-
+  
   # ... then try row labels
   to_detect = str_squish(data.frame(first_rows)[,1])
   n_in_first_rows = str_detect(to_detect, pattern=sample_patterns) # just look at column label
@@ -1145,7 +1043,7 @@ if(nrow(sample_sizes) > 0){
       return(nums)
     }
   }
-
+  
   # if no sample sizes from column headers guess from: 1) numbers, 2) percents in table cells
   if(any(processed_table$statistic == 'numbers')){
     numbers = filter(processed_table, statistic == 'numbers',
@@ -1188,9 +1086,9 @@ if(nrow(sample_sizes) > 0){
     select(column, median) %>%
     rename('sample_size' = 'median')
   if(nrow(check_stats) > 0 & do_not_use == FALSE ){ 
-      return(check_stats)
+    return(check_stats)
   }
-
+  
   ## try reconstructing n from numbers (last try)
   # are there rows with the same estimated N?
   est_N = filter(processed_table, statistic == 'numbers',
@@ -1301,15 +1199,8 @@ t.test2.binomial <- function(a, b, c, d, return_what = 't')
 }
 
 ### get the table data ready for the Bayesian model
-make_stats_for_bayes_model = function(indata, 
-                                      symmetrize  = FALSE, # symmetrize distribution to avoid false positives, did not work, but kept 
-                                      test_run = FALSE # a test run on a sample of 50
-                                      ){
-  # sub-sample
-  if(test_run==TRUE){
-    to_include = sample(unique(indata$pmcid), size=50, replace=FALSE)
-    indata = filter(indata, pmcid %in% to_include)
-  }
+# using indata in long format
+make_stats_for_bayes_model = function(indata){
   
   # create all possible comparisons of two columns (g1 vs g2, g1 vs g3, etc)
   max_columns = group_by(indata, pmcid) %>%
@@ -1334,76 +1225,91 @@ make_stats_for_bayes_model = function(indata,
       }
     }
   } # end of if
-  # now bind data
+  # now select data
   if(is.null(new_data)==FALSE){
-    bind_data = bind_rows(two_max, new_data) %>%
-      select(-max_columns)
+    bind_data = dplyr::select(new_data, -max_columns)
   }
   if(is.null(new_data)==TRUE){ # do not need to add extra data
     bind_data = dplyr::select(two_max, -max_columns)
   }
-
   
-# a) continuous (including CIs which have been changed to mean (SD))
+  
+  # a) continuous (including CIs which have been changed to mean (SD))
   cstats = filter(bind_data,
-                    statistic %in% c('ci','continuous')) %>% # must have positive SD
-      group_by(pmcid, row, statistic) %>%
-      summarise(
-        size = sum(sample_size), # total sample size
-        mdiff = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'difference'),
-        sem = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'se'),
-        t = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 't'),
-        p = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'p'),
-        sem2 = sem^2) %>% # squared
-      filter(!is.na(mdiff),
-             !is.na(sem2)) %>%
-      ungroup() 
-  if(symmetrize == TRUE & is.null(cstats)==FALSE){ # create approximately symmetric distribution
-    cstats = arrange(cstats, pmcid, t) %>% # order by t
-      mutate(even = 1:n()%%2,# make odd/even
-             mdiff = ifelse(even==1, abs(mdiff), -1*abs(mdiff)),
-             t = ifelse(even==1, abs(t), -1*abs(t))) # alternative negative and positive results
-  }
+                  statistic %in% c('ci','continuous')) %>% # must have positive SD
+    group_by(pmcid, row, statistic) %>%
+    summarise(
+      # now summaries
+      size = sum(sample_size), # total sample size
+      mdiff = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'difference'),
+      sem = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'se'),
+      t = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 't'),
+      p = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'p'),
+      sem2 = sem^2) %>% # squared
+    filter(!is.na(mdiff),
+           !is.na(sem2)) %>%
+    ungroup() 
+  # add back statistics, used by bootstrap simulation
+  add_back1 = filter(bind_data, statistic %in% c('ci','continuous'),
+                     column == 1) %>%
+    rename('m1' = 'stat1',
+           'sd1' = 'stat2',
+           'n1' = 'sample_size') %>%
+    select(pmcid, row, m1, sd1, n1)
+  add_back2 = filter(bind_data, statistic %in% c('ci','continuous'),
+                     column == 2) %>%
+    rename('m2' = 'stat1',
+           'sd2' = 'stat2',
+           'n2' = 'sample_size') %>%
+    select(pmcid, row, m2, sd2, n2)
+  cstats = full_join(full_join(cstats, add_back1, by=c('pmcid','row')),
+                     add_back2, by=c('pmcid','row')) 
   
   # percentages
   pstats = NULL
   if(any(bind_data$statistic %in% c('percent','numbers')) == TRUE){ # needed because simulations may have no percents
-  pstats = filter(bind_data,
-                  statistic %in% c('percent','numbers')) %>%
-    group_by(pmcid, row, statistic) %>%
-    pivot_wider(id_cols=c(pmcid,statistic,row), names_from='column', values_from=c('stat1','sample_size'))  %>%
-    mutate(a = stat1_1, # successes
-           b = stat1_2,
-           c = sample_size_1 - stat1_1, # failures
-           d = sample_size_2 - stat1_2) %>%
-    filter(a>=0, b>=0, c>=0, d>=0) %>%
-    summarise(
-      size = sample_size_1 + sample_size_2, # total sample size
-      mdiff = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'difference'),
-      sem = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'se'),
-      t = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 't'),
-      p = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'p'),
-      sem2 = sem^2) %>% # squared
-    filter(!is.na(mdiff),
-           !is.na(sem2),
-           sem2 > 0) %>%
-    ungroup() 
+    pstats = filter(bind_data,
+                    statistic %in% c('percent','numbers')) %>%
+      group_by(pmcid, row, statistic) %>%
+      pivot_wider(id_cols=c(pmcid,statistic,row), names_from='column', values_from=c('stat1','sample_size'))  %>%
+      mutate(a = stat1_1, # successes
+             b = stat1_2,
+             c = sample_size_1 - stat1_1, # failures
+             d = sample_size_2 - stat1_2) %>%
+      filter(a>=0, b>=0, c>=0, d>=0) %>%
+      summarise(
+        size = sample_size_1 + sample_size_2, # total sample size
+        mdiff = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'difference'),
+        sem = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'se'),
+        t = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 't'),
+        p = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'p'),
+        sem2 = sem^2) %>% # squared
+      filter(!is.na(mdiff),
+             !is.na(sem2),
+             sem2 > 0) %>%
+      ungroup() 
   }
-  ## not yet checked
-  if(symmetrize == TRUE & is.null(pstats)==FALSE){ # create approximately symmetric distribution
-    pstats = arrange(pstats, pmcid, t) %>% # arrange by t-statistic
-      mutate(even = 1:n()%%2,# make odd/even
-             mdiff = ifelse(even==1, abs(mdiff), -1*abs(mdiff)), # alternative negative and positive results
-             t = ifelse(even==1, abs(t), -1*abs(t)))
-  }
+  # add back statistics, used by bootstrap simulation
+  add_back1 = filter(bind_data, statistic %in% c('percent','numbers'),
+                     column == 1) %>%
+    rename('n1' = 'stat1',
+           'N1' = 'sample_size') %>%
+    select(pmcid, row, n1, N1)
+  add_back2 = filter(bind_data, statistic %in% c('percent','numbers'),
+                     column == 2) %>%
+    rename('n2' = 'stat1',
+           'N2' = 'sample_size') %>%
+    select(pmcid, row, n2, N2)
+  pstats = full_join(full_join(pstats, add_back1, by=c('pmcid','row')),
+                     add_back2, by=c('pmcid','row')) 
   
-  # combine
+  # combine continuous and percents
   stats = bind_rows(cstats, pstats) %>%
     arrange(pmcid, row) %>%
     mutate(study = as.numeric(as.factor(pmcid))) # turn into a number
   
-return(stats)
-
+  return(stats)
+  
 } # end of function
 
 
@@ -1427,31 +1333,31 @@ exclude_text_tables = function(xml_table, table_number){
   complete = FALSE
   max_tables = length (xml_table %>% xml_nodes("table")) # maximum number of tables
   while(complete==FALSE){ # may need to be done for repeated tables
-  # extract table
-  table1 <- xml_table %>%
-    xml_nodes("table") %>% # need have -wrap because of multiple tables in one
-    .[table_number] %>%
-    xml_text() # 
-  
-  if(length(table1)>0){
-    if(nchar(table1)>0){ # needed two if statements because of graphical tables
-      text_count = str_count(table1, '[a-z]')
-      number_count = str_count(table1, '[0-9]')
-      if((number_count / text_count) < 0.1){table_number = table_number +1} # if less than 10% numbers
-      if((number_count / text_count) >= 0.1){complete = TRUE}
+    # extract table
+    table1 <- xml_table %>%
+      xml_nodes("table") %>% # need have -wrap because of multiple tables in one
+      .[table_number] %>%
+      xml_text() # 
+    
+    if(length(table1)>0){
+      if(nchar(table1)>0){ # needed two if statements because of graphical tables
+        text_count = str_count(table1, '[a-z]')
+        number_count = str_count(table1, '[0-9]')
+        if((number_count / text_count) < 0.1){table_number = table_number +1} # if less than 10% numbers
+        if((number_count / text_count) >= 0.1){complete = TRUE}
+      }
     }
-  }
-  
-  # no tables available so end
-  if(table_number > max_tables){
-    table_number = 998
-    complete = TRUE
-  }
-  
-  if(length(table1) == 0){ # no text content in table, likely graphical table (need to check) - could add check for <graphic>
-    table_number = 999
-    complete = TRUE
-  }
+    
+    # no tables available so end
+    if(table_number > max_tables){
+      table_number = 998
+      complete = TRUE
+    }
+    
+    if(length(table1) == 0){ # no text content in table, likely graphical table (need to check) - could add check for <graphic>
+      table_number = 999
+      complete = TRUE
+    }
   } # end of while
   
   return(table_number)
@@ -1508,7 +1414,7 @@ combine_columns = function(intable, stat1='', stat2='', reverse=FALSE){
   pat_not = paste(apply(expand.grid(stat1, stat2), 1, paste, collapse=".?.?."), collapse='|') # triple dots as could be mean sd or mean [plus/mins]sd with spaces
   # stat2 then stat1 - can be in either order for header
   pat_not_h_rev = paste(apply(expand.grid(paste('[a-z]?',stat2, sep=''), 
-                                      paste('[a-z]?',stat1, sep='')), 1, paste, collapse=".?.?."), collapse='|') # triple dots as could be mean sd or mean [plus/mins]sd with spaces
+                                          paste('[a-z]?',stat1, sep='')), 1, paste, collapse=".?.?."), collapse='|') # triple dots as could be mean sd or mean [plus/mins]sd with spaces
   pat_not_rev = paste(apply(expand.grid(stat2, stat1), 1, paste, collapse=".?.?."), collapse='|') # triple dots as could be mean sd or mean [plus/mins]sd with spaces
   ## searches
   #numbers_start = numbers_start_function(intable) -depending on where numbers start
@@ -1766,12 +1672,12 @@ run_bugs = function(in_data,
                     batch_size = 3, # run in batches if looking for a problem 
                     p_precision = 0.05 # prior probabilities that the study precision is too wide or too narrow
 ){
-
+  
   #
   
   if(find_problem == FALSE){ # 
     in_data = mutate(in_data,
-                       study = as.numeric(as.factor(study))) # re-number, just in case missing numbers
+                     study = as.numeric(as.factor(study))) # re-number, just in case missing numbers
     bugs = run_bugs_one(in_data = in_data,
                         debug = debug,
                         study_specific = study_specific,
@@ -1782,7 +1688,7 @@ run_bugs = function(in_data,
   if(find_problem == TRUE){ # search for problem studies
     debug = FALSE # takes too long if true
     n_studies = max(in_data$study)
-     for (k in 1:(n_studies/batch_size)){
+    for (k in 1:(n_studies/batch_size)){
       start = ((k-1)*batch_size)+1
       end = k*batch_size
       cat('studies =',start:end,'\n')
@@ -1805,66 +1711,66 @@ run_bugs_one = function(in_data,
                         study_specific = FALSE, # study specific prior probability for theta
                         single_study = FALSE,
                         hyper_theta = FALSE, # hyper-parameter for theta?
-                    p_precision = NA # prior probabilities that the study precision is: too wide, zero, too narrow
+                        p_precision = NA # prior probabilities that the study precision is: too wide, zero, too narrow
 ){
-# prepare the data for Winbugs
-#sample = sample(unique(in_data$pmcid), 10) # temporary
-#in_data = filter(in_data, pmcid %in% sample) %>%
-#  mutate(study = as.numeric(as.factor(study))) # renumber
-N = nrow(in_data) # number of statistics
-N_studies = length(unique(in_data$study)) # number of studies
-bdata = list(N = N, 
-             mdiff = in_data$mdiff,
-             N_studies = N_studies, 
-             df = in_data$size - 1, # degrees of freedom
-             study = in_data$study, 
-             inv.sem2 = 1 / in_data$sem2) # inverse-variance
-## initial values
-# precision
-mu.var = matrix(data=NA, ncol=2, nrow=N_studies) # start with NA
-mu.var[,2] = 0.1 # small positive
-#
-if(hyper_theta == TRUE){
-inits = list(p_precision = p_precision,
-             mu.var = mu.var, 
-             var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
-}
-if(hyper_theta == FALSE){
-  inits = list(mu.var = mu.var, 
-               var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
-}
-if(study_specific==TRUE){
-  inits$theta = rep(0.5, N_studies)
-}
-if(single_study == TRUE){
-  inits = list(mu.var = c(NA, 0.1), 
-               var.flag = 0)  # start all with no flag for mean or variance
-}
-inits = rep(list(inits), n.chains) # repeat per chains
-
-if(hyper_theta == TRUE){
-  model.file = bfile # see 4_make_winbugs.R
-  parms = c('var.flag','mu.var','p_precision')
-}
-if(hyper_theta == FALSE){
-  model.file = bfile_no_hyper
-  parms = c('var.flag','mu.var')
-}
-if(study_specific == TRUE){
-  model.file = bfile_study_specific
-  parms = c('var.flag','mu.var','theta')
-}
-if(single_study == TRUE){
-  model.file = bfile_no_hyper_single
-  parms = c('var.flag','mu.var')
-  bdata$N_studies = NULL # remove, not needed for single study
-  bdata$study = NULL # remove
-}
-bugs = bugs(data=bdata, inits=inits, parameters=parms, model.file=model.file, DIC=FALSE,
-            n.chains=n.chains, n.iter=MCMC*thin*2, n.thin=thin, bugs.seed=seed, debug=debug,
-            bugs.directory="c:/Program Files/WinBUGS14")
-
-return(bugs)
+  # prepare the data for Winbugs
+  #sample = sample(unique(in_data$pmcid), 10) # temporary
+  #in_data = filter(in_data, pmcid %in% sample) %>%
+  #  mutate(study = as.numeric(as.factor(study))) # renumber
+  N = nrow(in_data) # number of statistics
+  N_studies = length(unique(in_data$study)) # number of studies
+  bdata = list(N = N, 
+               mdiff = in_data$mdiff,
+               N_studies = N_studies, 
+               df = in_data$size - 1, # degrees of freedom
+               study = in_data$study, 
+               inv.sem2 = 1 / in_data$sem2) # inverse-variance
+  ## initial values
+  # precision
+  mu.var = matrix(data=NA, ncol=2, nrow=N_studies) # start with NA
+  mu.var[,2] = 0.1 # small positive
+  #
+  if(hyper_theta == TRUE){
+    inits = list(p_precision = p_precision,
+                 mu.var = mu.var, 
+                 var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
+  }
+  if(hyper_theta == FALSE){
+    inits = list(mu.var = mu.var, 
+                 var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
+  }
+  if(study_specific==TRUE){
+    inits$theta = rep(0.5, N_studies)
+  }
+  if(single_study == TRUE){
+    inits = list(mu.var = c(NA, 0.1), 
+                 var.flag = 0)  # start all with no flag for mean or variance
+  }
+  inits = rep(list(inits), n.chains) # repeat per chains
+  
+  if(hyper_theta == TRUE){
+    model.file = bfile # see 4_make_winbugs.R
+    parms = c('var.flag','mu.var','p_precision')
+  }
+  if(hyper_theta == FALSE){
+    model.file = bfile_no_hyper
+    parms = c('var.flag','mu.var')
+  }
+  if(study_specific == TRUE){
+    model.file = bfile_study_specific
+    parms = c('var.flag','mu.var','theta')
+  }
+  if(single_study == TRUE){
+    model.file = bfile_no_hyper_single
+    parms = c('var.flag','mu.var')
+    bdata$N_studies = NULL # remove, not needed for single study
+    bdata$study = NULL # remove
+  }
+  bugs = bugs(data=bdata, inits=inits, parameters=parms, model.file=model.file, DIC=FALSE,
+              n.chains=n.chains, n.iter=MCMC*thin*2, n.thin=thin, bugs.seed=seed, debug=debug,
+              bugs.directory="c:/Program Files/WinBUGS14")
+  
+  return(bugs)
 } # end of function
 
 ## function to remove duplicate rows
@@ -2080,69 +1986,69 @@ statistics_detect = function(intable,
 
 ## function to select papers from Bayesian model results, used by 5_summary_results.Rmd
 select_papers = function(
-in_data,
-stats,
-exclude = NULL, # exclude based on multiplier; useful to exclude extreme results
-flag, # looking at mean or variance flag
-flag_value, # flag value to select
-flag_null_value, # flag value to select for comparison
-mean_select = '', # positive or negative
-variable,
-n_select # number of studies to select
+    in_data,
+    stats,
+    exclude = NULL, # exclude based on multiplier; useful to exclude extreme results
+    flag, # looking at mean or variance flag
+    flag_value, # flag value to select
+    flag_null_value, # flag value to select for comparison
+    mean_select = '', # positive or negative
+    variable,
+    n_select # number of studies to select
 ){
   # get number of rows per study to avoid including studies with few rows
   n_rows = group_by(in_data, study) %>% tally()
-# find studies that are flagged
-flagged = filter(stats, nicevar == flag, median == flag_value) %>%
-  select(study) %>%
-  left_join(n_rows, by='study') %>%
-  filter(n > 2) # more than two results
-# merge with mean
-means = filter(stats, nicevar == variable) %>%
-  right_join(flagged, by='study')
-# exclude based on precision multiplier (either too big or too small)
-if(is.null(exclude)==FALSE & mean_select == 'positive'){
-  means = filter(means, mean <= log(exclude)) # given on non-log scale so need to transform
-}
-if(is.null(exclude)==FALSE & mean_select == 'negative'){
-  means = filter(means, mean >= log(exclude)) # given on non-log scale so need to transform
-}
-if(mean_select == 'negative'){
-  means = arrange(means, mean)
-}
-if(mean_select == 'positive'){
-  means = arrange(means, desc(mean))
-}
-means = slice(means, 1:n_select) %>%
-  select(study)
-# merge top studies with data
-t_stats_flagged = left_join(means, in_data, by='study')
-
-# now find studies that are not flagged as a contrast
-not_flagged = filter(stats, nicevar == flag, median == flag_null_value) %>%
-  select(study) %>%
-  left_join(n_rows, by='study') %>%
-  filter(n > 2) # more than two results
-# merge with mean
-means = filter(stats, nicevar == variable) %>%
-  right_join(not_flagged, by='study') %>%
-  sample_n(n_select) %>% # just select at random
-  select(study)
-# merge top studies with data
-t_stats_not_flagged = left_join(means, in_data, by='study')
-
-# make ordered factor (so that issue and not are grouped)
-pmcid1 = unique(t_stats_flagged$pmcid)
-pmcid1 = pmcid1[order(pmcid1)] # for neater ordering in plots
-pmcid2 = unique(t_stats_not_flagged$pmcid)
-pmcid2 = pmcid2[order(pmcid2)] # for neater ordering in plots
-for_order = c(pmcid1, pmcid2)
-
-# combine and return
-t_stats = bind_rows(t_stats_flagged, t_stats_not_flagged, .id='type') %>%
-  mutate(pmcid_ordered = factor(pmcid, levels=for_order))
-
-return(t_stats)
+  # find studies that are flagged
+  flagged = filter(stats, nicevar == flag, median == flag_value) %>%
+    select(study) %>%
+    left_join(n_rows, by='study') %>%
+    filter(n > 2) # more than two results
+  # merge with mean
+  means = filter(stats, nicevar == variable) %>%
+    right_join(flagged, by='study')
+  # exclude based on precision multiplier (either too big or too small)
+  if(is.null(exclude)==FALSE & mean_select == 'positive'){
+    means = filter(means, mean <= log(exclude)) # given on non-log scale so need to transform
+  }
+  if(is.null(exclude)==FALSE & mean_select == 'negative'){
+    means = filter(means, mean >= log(exclude)) # given on non-log scale so need to transform
+  }
+  if(mean_select == 'negative'){
+    means = arrange(means, mean)
+  }
+  if(mean_select == 'positive'){
+    means = arrange(means, desc(mean))
+  }
+  means = slice(means, 1:n_select) %>%
+    select(study)
+  # merge top studies with data
+  t_stats_flagged = left_join(means, in_data, by='study')
+  
+  # now find studies that are not flagged as a contrast
+  not_flagged = filter(stats, nicevar == flag, median == flag_null_value) %>%
+    select(study) %>%
+    left_join(n_rows, by='study') %>%
+    filter(n > 2) # more than two results
+  # merge with mean
+  means = filter(stats, nicevar == variable) %>%
+    right_join(not_flagged, by='study') %>%
+    sample_n(n_select) %>% # just select at random
+    select(study)
+  # merge top studies with data
+  t_stats_not_flagged = left_join(means, in_data, by='study')
+  
+  # make ordered factor (so that issue and not are grouped)
+  pmcid1 = unique(t_stats_flagged$pmcid)
+  pmcid1 = pmcid1[order(pmcid1)] # for neater ordering in plots
+  pmcid2 = unique(t_stats_not_flagged$pmcid)
+  pmcid2 = pmcid2[order(pmcid2)] # for neater ordering in plots
+  for_order = c(pmcid1, pmcid2)
+  
+  # combine and return
+  t_stats = bind_rows(t_stats_flagged, t_stats_not_flagged, .id='type') %>%
+    mutate(pmcid_ordered = factor(pmcid, levels=for_order))
+  
+  return(t_stats)
 }
 
 # function to make nice results from winbugs, used by 4_model_cumulative.R

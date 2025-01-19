@@ -24,11 +24,11 @@ shinyServer(function(input, output) {
                      data = my_read_excel(inFile$datapath)
                      incProgress(1)
                    })
+      
+      data$original_table = NULL # to match previous structure
 
-      data$reason = NULL # to match structure from get_pmcid_table
-      data$original_table = NULL # ditto
     }
-    if (inPMCID!='' & is.null(inFile)==TRUE){
+    if (inPMCID!='' & is.null(inFile)==TRUE){ # get data from PMCID
       
       # progress message & get data
       withProgress(message = 'Getting the baseline table data from PubMed Central',
@@ -40,69 +40,70 @@ shinyServer(function(input, output) {
       
     }
     
-    # big if, only run stats if there's no reason
+    # big if, only run stats if there's no reason not to
     if(is.null(data$reason)){
-    
-    # get t-statistics for both statistics types (continuous and percent)
-    tstats.c = tstats.p = NULL
-    if(is.null(data$continuous) == FALSE){
-      tstats.c = t.stats.continuous(indata = data$continuous)
-    }
-    if(is.null(data$percents) == FALSE){
-      tstats.p = t.stats.percents(indata = data$percents)
-    }
-    # 
-    tstats = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
-      mutate(study = 1) # dummy study number
-    
-    ## exclude perfectly correlated neighbours, e.g. male/female gender
-    # does knock out some valid data, e.g, PMC7821012, but works very well on others, e.g, PMC6937882 with multiple examples
-    to_remove = filter(tstats, statistic == 2) %>% # percents only
-      arrange(row) %>%
-      mutate(diff = abs(lag(t) - t*(-1)) ) %>% # perfectly negative correlation in neighbouring rows
-      filter(diff < 0.001 & t!=0) %>% # small difference
-      select(row) 
-    n_removed = nrow(to_remove)
-    if(n_removed > 0){
-      # remove from stats
-      tstats = anti_join(tstats, to_remove, by='row')
-      # remove from data
-      index = rep(TRUE, nrow(data$percents))
-      index[to_remove$row] = FALSE
-      data$percents = data$percents[index,]
-    }
-    
-    # make simulated data
-    n.sims = input$n.sims
-    for (k in 1:n.sims){
-      tstats.sim = make_sim(data) # simulate based under H0 using the observed data
       
-      # get t-statistics for both statistics types
-      tstats.c = tstats.p = NULL
-      if(is.null(data$continuous) == FALSE){tstats.c = t.stats.continuous(indata = tstats.sim$continuous)}
-      if(is.null(data$percents) == FALSE){tstats.p = t.stats.percents(indata = tstats.sim$percents)}
-      tstats.sim = bind_rows(tstats.c, tstats.p, .id = 'statistic') %>%
-        mutate(study = k+1) # dummy study number
-      tstats = bind_rows(tstats, tstats.sim) # add to overall data
-    }
-    
+      # get t-statistics for both statistics types (continuous and percent)
+      tstats = make_stats_for_bayes_model(data$data) %>%
+        mutate(study = 1) # dummy study number
+      
+      ## exclude perfectly correlated neighbours, e.g. male/female gender
+      # does knock out some valid data, e.g, PMC7821012, but works very well on others, e.g, PMC6937882 with multiple examples
+      to_remove = filter(tstats, statistic == 'percent') %>% # percents only
+        arrange(row) %>%
+        mutate(diff = abs(lag(t) - t*(-1)) ) %>% # perfectly negative correlation in neighbouring rows
+        filter(diff < 0.001 & t!=0) %>% # small difference
+        select(row) 
+      n_removed = nrow(to_remove)
+      if(n_removed > 0){
+        # remove from stats
+        tstats = anti_join(tstats, to_remove, by='row')
+        # remove from data
+        index = rep(TRUE, nrow(data$percents))
+        index[to_remove$row] = FALSE
+        data$percents = data$percents[index,]
+      }
+      
+      # make simulated data from summary statistics
+      n.sims = input$n.sims
+      all_stats = tstats # start with observed data
+      for (k in 1:n.sims){
+        sim.data = make_sim(tstats) # simulate based under H0 using the observed data
+        
+        # get t-statistics for both statistics types
+        tstats.c = tstats.p = NULL
+        if(!is.null(sim.data$continuous)){
+          tstats.c = t.stats.continuous(indata = sim.data$continuous) %>%
+            mutate(statistic = 'continuous')
+        }
+        if(!is.null(sim.data$percents)){
+          tstats.p = t.stats.percents(indata = sim.data$percents) %>%
+            mutate(statistic = 'percent')
+        }
+        tstats.sim = bind_rows(tstats.c, tstats.p) %>%
+          mutate(pmcid = tstats$pmcid[1], # copy PMCID number
+                 study = k+1) # dummy study number
+        all_stats = bind_rows(all_stats, tstats.sim) # add to overall data
+      }
+      
     } # end of big if
     if(!is.null(data$reason)){ # if there is a reason ...
       n_removed = NULL
-      tstats = NULL
+      all_stats = NULL
       data$original_table = NULL
     }
     
     # return
     to.return = list()
     to.return$n_removed = n_removed
-    to.return$tstats = tstats
-    to.return$reason = data$reason
+    to.return$n_groups = max(data$data$column) # number of treatment groups
+    to.return$tstats = all_stats
+    if(!is.null(data$reason)){to.return$reason = data$reason} # carry-forward
     to.return$original_table = data$original_table
     return(to.return)
     
   }) # end of reaction function
-
+  
   # show the t-statistics for each row of the table
   output$tableRes <- renderTable({
     inPMCID <- input$pmcid
@@ -112,13 +113,12 @@ shinyServer(function(input, output) {
       table = filter(tstats()$tstats, study==1) %>% # just trial under consideration and not simulations
         select(statistic, row, size, mdiff, sem, t, p) %>%
         mutate(
-          size = as.integer(size), # to remove decimal places in presentation
-          statistic = ifelse(statistic==1, 'Continuous', 'Percent'))
+          size = as.integer(size)) # to remove decimal places in presentation
     }
     table # return
   })
-
-  # optional error message
+  
+  # optional error/warning message (to do, add warning)
   output$error <- renderText({
     inFile <- input$excel.file
     inPMCID <- input$pmcid
@@ -147,23 +147,25 @@ shinyServer(function(input, output) {
       
       # summary stats about the table
       n_rows = nrow(for_model)
-      n_continuous = sum(for_model$statistic == 1)
-      n_percent = sum(for_model$statistic == 2)
+      n_groups = tstats()$n_groups
+      n_continuous = sum(for_model$statistic == 'continuous')
+      n_percent = sum(for_model$statistic == 'percent')
       n_removed = tstats()$n_removed
       
       # extract stats from model
       if(is.null(tstats()$reason)){
-      mult = results$mult
-      text = paste(
-        'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentage.\n',
-        'There were ', n_removed,' rows removed because they were perfectly correlated with the previous row (e.g., percentage of males and females).\n',
-        'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
-        "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
+        mult = results$mult
+        text = paste(
+          'The table had ', n_rows,' rows of summary statistics, ', n_continuous ,' continuous and ', n_percent, ' percentage.\n',
+          'There were ', n_groups,' treatment groups.\n',
+          'There were ', n_removed,' rows removed because they were perfectly correlated with the previous row (e.g., percentage of males and females).\n',
+          'The probability that the trial is under- or over-dispersed is ', results$p.flag, '.\n',
+          "The precision multiplier is ", round(mult$mean,2), ", 90% CI ", round(mult$lower,2), ' to ', round(mult$upper,2), ". Multipliers under 1 indicated over-dispersion (lower precision) and over 1 under-dispersion (higher precision).", sep='')
       }
-      } # end of if for inPMCID
+    } # end of if for inPMCID
     text # return
   })
- 
+  
   # download the table data extracted from the XML file from PubMed Central
   output$download <- downloadHandler(
     filename = function(){paste('table_data_', input$pmcid, '.xlsx', sep='')},  # add PMCID to Excel filename
@@ -225,7 +227,7 @@ shinyServer(function(input, output) {
       writeData(wb, sheet = 2, startRow = 4, startCol = 7, x = 'SD ')
       if(nrow(continuous_stats) > 0){
         writeData(wb, sheet = 2, startRow = 5, x = continuous_stats,
-                     colNames = FALSE, rowNames = FALSE)
+                  colNames = FALSE, rowNames = FALSE)
         rows = 5:(5+nrow(continuous_stats)-1)
         addStyle(wb, sheet =2, rows = rows, cols=2:7, gridExpand = TRUE, style = yellow)
         addStyle(wb, sheet =2, rows = rows, cols=1, gridExpand = TRUE, style = green)
@@ -240,7 +242,7 @@ shinyServer(function(input, output) {
       writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 3, startCol = 5, x = 'N')
       if(nrow(percent_stats) > 0){
         writeData(wb, sheet = 2, startRow = 3 + nrow(continuous_stats) + 4, x = percent_stats,
-                     colNames = FALSE, rowNames = FALSE)
+                  colNames = FALSE, rowNames = FALSE)
         start = 3 + nrow(continuous_stats) + 4
         rows = start:(start+nrow(percent_stats)-1)
         addStyle(wb, sheet =2, rows = rows, cols=1, gridExpand = TRUE, style = green)
@@ -252,7 +254,7 @@ shinyServer(function(input, output) {
     }
   )
   
-   
+  
   # draw the histogram of t-statistics
   output$distPlot <- renderPlot({
     
@@ -291,17 +293,17 @@ shinyServer(function(input, output) {
       sizes = rep(1, n.sims + 2)
       sizes[c(1,n.sims + 2)] = 2 # median and trial are larger
       # plot
-      tplot = ggplot(data=tstats, aes(x=t, linewidth=factor(study), colour=factor(study))) +
-      theme_bw()+
-      scale_size_manual(values = sizes)+
-      scale_color_manual(values = colours)+
-      stat_ecdf()+
-      geom_step(data=cdf_median, aes(x=mid, y=e))+ # median CDF
-      xlab('t-statistic')+
-      ylab('Cumulative density')+
-      theme(text = element_text(size=14),
-            legend.position = 'none',
-            panel.grid.minor = element_blank())
+      tplot = ggplot(data=tstats, aes(x=t, linewidth=1, colour=factor(study))) +
+        theme_bw()+
+#        scale_size_manual(values = sizes)+ # kept all lines the same size
+        scale_color_manual(values = colours)+
+        stat_ecdf()+
+        geom_step(data=cdf_median, aes(x=mid, y=e))+ # median CDF
+        xlab('t-statistic')+
+        ylab('Cumulative density')+
+        theme(text = element_text(size=14),
+              legend.position = 'none',
+              panel.grid.minor = element_blank())
     }
     tplot
   })

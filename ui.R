@@ -35,7 +35,7 @@ shinyUI(fluidPage(
             
             # prior
             numericInput(inputId ="prior", 
-                         label = "Prior probability of under- or over-dispersion",
+                         label = "Prior probability of dispersion (either over- or under-)",
                          value = 0.5,
                          min = 0.01,
                          max = 0.99),
