@@ -1665,115 +1665,79 @@ get_affiliation = function(inpage){
   return(affiliation)
 } # end of function
 
-## run the Bayesian model
-run_bugs = function(in_data,
-                    debug = FALSE,
-                    single_study = FALSE, # running for a single study
-                    study_specific = TRUE, # study-specific probability of dispersion
-                    find_problem = FALSE, # search for problem studies
-                    batch_size = 3, # run in batches if looking for a problem 
-                    p_precision = 0.05 # prior probabilities that the study precision is too wide or too narrow
+
+
+## function to run Bayesian model (nimble version)
+run_bayes_test = function(in_data,
+                          MCMC = 1000,
+                          p_prior = 0.5,
+                          thin = 3
 ){
   
+  # prepare the data for nimble (version with single study)
+  N = nrow(in_data) # number of statistics
+  constants = list(N = N, p_prior = p_prior)
   #
+  data = list(mdiff = in_data$mdiff,
+              inv.sem2 = 1 / in_data$sem2, # inverse-variance
+              df = in_data$size - 1) # degrees of freedom
   
-  if(find_problem == FALSE){ # 
-    in_data = mutate(in_data,
-                     study = as.numeric(as.factor(study))) # re-number, just in case missing numbers
-    bugs = run_bugs_one(in_data = in_data,
-                        debug = debug,
-                        study_specific = study_specific,
-                        single_study = single_study,
-                        p_precision = p_precision)
-  }
+  ## initial values
+  mu.var = rep(NA, 2)
+  mu.var[2] = 0.1 # small positive
+  #
+  inits = list(mu.var = mu.var, 
+               var.flag = 0)  # start all with no flag for mean or variance
   
-  if(find_problem == TRUE){ # search for problem studies
-    debug = FALSE # takes too long if true
-    n_studies = max(in_data$study)
-    for (k in 1:(n_studies/batch_size)){
-      start = ((k-1)*batch_size)+1
-      end = k*batch_size
-      cat('studies =',start:end,'\n')
-      this_data = filter(in_data, study >= start, study <= end) %>%
-        mutate(study = as.numeric(as.factor(study))) # re-number
-      bugs = run_bugs_one(in_data = this_data,
-                          debug = debug,
-                          study_specific = study_specific,
-                          p_precision = p_precision)
+  # model
+  baselineCode <- nimbleCode({
+    # Model
+    for(i in 1:N){
+      mdiff[i] ~ dt(0, tau[i], df[i])
+      tau[i] <- inv.sem2[i] * inv.var # precision
     }
-  }
+    
+    # Priors
+    # spike-slab for inverse-variance
+    log(inv.var) <- mu.var[pick]
+    pick <- var.flag + 1
+    var.flag ~ dbern(p_prior) # 
+    mu.var[1] <- 0 # spike at zero (no change in precision)
+    mu.var[2] ~ dnorm(0, 0.1) # "slab"
+  })
   
-  return(bugs)
+  # make chains
+  nimbleMCMC_samples <- nimbleMCMC(code = baselineCode, 
+                                   constants = constants, 
+                                   data = data, 
+                                   inits = inits,
+                                   setSeed = 816,
+                                   thin = thin,
+                                   niter = MCMC*thin*2,
+                                   nburnin = MCMC*thin)
   
+  # summary stats
+  means = colMeans(nimbleMCMC_samples)
+  lower = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.05)
+  upper = apply(nimbleMCMC_samples, 2, FUN=quantile, probs=0.95)
+  stats = data.frame(var = colnames(nimbleMCMC_samples), mean = means, lower = lower, upper=upper)
+  row.names(stats) = NULL
+  
+  # pick out results
+  p.flag = filter(stats, var=='var.flag') %>% pull(mean)
+  mult =  filter(stats, var=='mu.var[2]')  %>%
+    mutate(mean = exp(mean),
+           lower = exp(lower),
+           upper = exp(upper))
+  
+  #
+  to.return = list()
+  to.return$p.flag = p.flag
+  to.return$mult = mult
+  return(to.return)
 } # end of function
 
-## run a single version of the model
-run_bugs_one = function(in_data,
-                        debug = debug,
-                        study_specific = FALSE, # study specific prior probability for theta
-                        single_study = FALSE,
-                        hyper_theta = FALSE, # hyper-parameter for theta?
-                        p_precision = NA # prior probabilities that the study precision is: too wide, zero, too narrow
-){
-  # prepare the data for Winbugs
-  #sample = sample(unique(in_data$pmcid), 10) # temporary
-  #in_data = filter(in_data, pmcid %in% sample) %>%
-  #  mutate(study = as.numeric(as.factor(study))) # renumber
-  N = nrow(in_data) # number of statistics
-  N_studies = length(unique(in_data$study)) # number of studies
-  bdata = list(N = N, 
-               mdiff = in_data$mdiff,
-               N_studies = N_studies, 
-               df = in_data$size - 1, # degrees of freedom
-               study = in_data$study, 
-               inv.sem2 = 1 / in_data$sem2) # inverse-variance
-  ## initial values
-  # precision
-  mu.var = matrix(data=NA, ncol=2, nrow=N_studies) # start with NA
-  mu.var[,2] = 0.1 # small positive
-  #
-  if(hyper_theta == TRUE){
-    inits = list(p_precision = p_precision,
-                 mu.var = mu.var, 
-                 var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
-  }
-  if(hyper_theta == FALSE){
-    inits = list(mu.var = mu.var, 
-                 var.flag = rep(0, N_studies))  # start all with no flag for mean or variance
-  }
-  if(study_specific==TRUE){
-    inits$theta = rep(0.5, N_studies)
-  }
-  if(single_study == TRUE){
-    inits = list(mu.var = c(NA, 0.1), 
-                 var.flag = 0)  # start all with no flag for mean or variance
-  }
-  inits = rep(list(inits), n.chains) # repeat per chains
-  
-  if(hyper_theta == TRUE){
-    model.file = bfile # see 4_make_winbugs.R
-    parms = c('var.flag','mu.var','p_precision')
-  }
-  if(hyper_theta == FALSE){
-    model.file = bfile_no_hyper
-    parms = c('var.flag','mu.var')
-  }
-  if(study_specific == TRUE){
-    model.file = bfile_study_specific
-    parms = c('var.flag','mu.var','theta')
-  }
-  if(single_study == TRUE){
-    model.file = bfile_no_hyper_single
-    parms = c('var.flag','mu.var')
-    bdata$N_studies = NULL # remove, not needed for single study
-    bdata$study = NULL # remove
-  }
-  bugs = bugs(data=bdata, inits=inits, parameters=parms, model.file=model.file, DIC=FALSE,
-              n.chains=n.chains, n.iter=MCMC*thin*2, n.thin=thin, bugs.seed=seed, debug=debug,
-              bugs.directory="c:/Program Files/WinBUGS14")
-  
-  return(bugs)
-} # end of function
+
 
 ## function to remove duplicate rows
 remove_duplicate_rows = function(intable){

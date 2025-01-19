@@ -139,7 +139,7 @@ shinyServer(function(input, output) {
                    detail = 'This may take a few minutes...', value = 0,{
                      incProgress(0.25)
                      for_model = filter(tstats()$tstats, study==1) # just trial under consideration and not simulations
-                     results = run_bayes_test(in_data = for_model, p_prior = input$prior)
+                     results = run_bayes_test(in_data = for_model, p_prior = input$prior) # from 99_functions.R
                      incProgress(1)
                    })
       
