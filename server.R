@@ -57,11 +57,9 @@ shinyServer(function(input, output) {
       n_removed = nrow(to_remove)
       if(n_removed > 0){
         # remove from stats
-        tstats = anti_join(tstats, to_remove, by='row')
+        tstats = filter(tstats, !row %in% to_remove$row)
         # remove from data
-        index = rep(TRUE, nrow(data$percents))
-        index[to_remove$row] = FALSE
-        data$percents = data$percents[index,]
+        data$data = filter(data$data, !(statistic=='percent' & row %in% to_remove$row))
       }
       
       # make simulated data from summary statistics

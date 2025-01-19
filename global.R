@@ -8,7 +8,7 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(nimble)
-#library(metareadr) # for full text
+library(metareadr) # for full text, download from github
 library(rvest)
 library(xml2)
 source('get_pmcid_table.R')

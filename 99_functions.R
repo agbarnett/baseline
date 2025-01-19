@@ -4,8 +4,10 @@
 
 
 # read and process Excel file (version for multiple columns)
+# must keep row names
 my_read_excel = function(input_file){
   warning = NULL
+  
   # read in the file and assign dummy names (two groups only so far)
   raw = read_excel(path = input_file, sheet=1, col_names = FALSE, skip=2)
   names(raw) = paste('v', 1:ncol(raw), sep='')
@@ -32,6 +34,7 @@ my_read_excel = function(input_file){
     # names based on number of groups
     cont_names = paste(rep(c('n','m','sd'),n_groups), rep(1:n_groups,each=3), sep='')
     names(continuous) = c('v1', cont_names)
+    continuous = mutate(continuous, row = 1:n()) # to keep ordering from sheet
   }
   
   # extract percent summary stats
@@ -44,23 +47,23 @@ my_read_excel = function(input_file){
     cat_names = paste(rep(c('n','N'),n_groups), rep(1:n_groups,each=2), sep='')
     names(percents) = c('v1', cat_names)
     percents = select(percents, matches('^v|^n|^N')) # remove blank columns
+    percents = mutate(percents, row = 1:n()) # to keep ordering from sheet
   }
   
   # convert percents to long format
   percents_long = NULL
   if(!is.null(percents)){
-    col1 = select(percents, 'v1', starts_with('n', ignore.case = FALSE)) %>%
-      pivot_longer(-'v1', values_to = 'stat1') %>%
+    col1 = select(percents, 'v1', 'row', starts_with('n', ignore.case = FALSE)) %>%
+      pivot_longer(-c('v1','row'), values_to = 'stat1') %>%
       mutate(column = as.numeric(str_remove(name,'n'))) %>%
       select(-name)
     if(any(col1$stat1 - round(col1$stat1) !=0)){warning = paste(warning, 'Non-integer numerators.\n', sep='')}
-    col2 = select(percents, 'v1', starts_with('N', ignore.case = FALSE)) %>%
-      pivot_longer(-'v1', values_to = 'sample_size') %>%
+    col2 = select(percents, 'v1', 'row', starts_with('N', ignore.case = FALSE)) %>%
+      pivot_longer(-c('v1','row'), values_to = 'sample_size') %>%
       mutate(column = as.numeric(str_remove(name,'N'))) %>%
       select(-name)
-    percents_long = full_join(col1, col2, by=c('v1','column')) %>%
-      mutate(row = as.numeric(as.factor(v1)), # row numbers will now be alphabetical
-             stat2 = 100*stat1/sample_size,
+    percents_long = full_join(col1, col2, by=c('v1','row','column')) %>%
+      mutate(stat2 = 100*stat1/sample_size,
              statistic = 'percent') 
     max.percent = max(percents_long$row) # highest row number in percentages
   }
@@ -68,21 +71,20 @@ my_read_excel = function(input_file){
   # convert continuous to long format
   continuous_long = NULL
   if(!is.null(continuous)){
-    ccol1 = select(continuous, 'v1', starts_with('n', ignore.case = FALSE)) %>%
-      pivot_longer(-'v1', values_to = 'sample_size') %>%
+    ccol1 = select(continuous, 'v1', 'row', starts_with('n', ignore.case = FALSE)) %>%
+      pivot_longer(-c('v1','row'), values_to = 'sample_size') %>%
       mutate(column = as.numeric(str_remove(name,'n'))) %>%
       select(-name)
-    ccol2 = select(continuous, 'v1', starts_with('m', ignore.case = FALSE)) %>%
-      pivot_longer(-'v1', values_to = 'stat1') %>%
+    ccol2 = select(continuous, 'v1', 'row', starts_with('m', ignore.case = FALSE)) %>%
+      pivot_longer(-c('v1','row'), values_to = 'stat1') %>%
       mutate(column = as.numeric(str_remove(name,'m'))) %>%
       select(-name)
-    ccol3 = select(continuous, 'v1', starts_with('sd', ignore.case = FALSE)) %>%
-      pivot_longer(-'v1', values_to = 'stat2') %>%
+    ccol3 = select(continuous, 'v1', 'row', starts_with('sd', ignore.case = FALSE)) %>%
+      pivot_longer(-c('v1','row'), values_to = 'stat2') %>%
       mutate(column = as.numeric(str_remove(name,'sd'))) %>%
       select(-name)
-    continuous_long = full_join(ccol1, full_join(ccol2, ccol3, by=c('v1','column')), by=c('v1','column')) %>%
-      mutate(row = as.numeric(as.factor(v1)), # row numbers will now be alphabetical
-             row = row + max.percent, # add 
+    continuous_long = full_join(ccol1, full_join(ccol2, ccol3, by=c('v1','row','column')), by=c('v1','row','column')) %>%
+      mutate(row = row + max.percent, # add to make sure rows do not clash with percents
              statistic = 'continuous')
   }
   
