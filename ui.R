@@ -13,7 +13,7 @@ shinyUI(fluidPage(
                       ' and a blank template is ', 
                       a(href="https://raw.githubusercontent.com/agbarnett/baseline/master/excel_template.xlsx", "here"),
                       '. A paper with details on the approach is ', 
-                      a(href="https://f1000research.com/articles/11-783/v1", "here"),
+                      a(href="https://f1000research.com/articles/11-783/v2", "here"),
                       '.')))),
     
     # Sidebar to read in Excel file
@@ -47,15 +47,22 @@ shinyUI(fluidPage(
                       label = "Number of simulations",
                       value = 20,
                       min = 1,
-                      max = 200)
+                      max = 200),
+      			
+			      # choice of output, histogram or cumulative density
+      			selectInput(inputId = "graph.style", 
+      			            label = "Plot the cumulative density or histogram",
+      			            choices = c("Cumulative density" = "cumulative",
+			                              "Histogram" = "histogram"),
+      			            selected = "cumulative")
             
         ),
             
         # Show a plot of the t-statistics
         mainPanel(
         #    
-           h4("Cumulative density functions (CDFs)"),
-           h5("The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. The median of the simulations is in blue."),
+           h4(textOutput("whichPlotTitle")),
+           textOutput("whichPlot"),
            plotOutput("distPlot"),
            #
            h4("Error message (if any):"),
@@ -75,18 +82,23 @@ shinyUI(fluidPage(
     # footnotes
     mainPanel(
         
-        # examples from 1_run_example.R
-        h4("An example of an under-dispersed trial:"),
+      # examples from 1_run_example.R
+      h3("Some notes on the plots"),
+      p("The plots are designed to help interpret the results of the Bayesian model."),
+      h4("An example of an under-dispersed trial that has been retracted for data fabrication (PMID: 9366938, first two columns of baseline table):"),
         div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_under.jpg", height = 400, width = 500, style="left;")),
+      p("Here the trial CDF (red line) is too thin with a sharp change in the cumulative distribution because too many t-statistics are close to zero. The probability that the trial is under- or over-dispersed is 0.99, with a precision multiplier of 8.6 (much larger than 1)."),
      br(),
         
-        h4("An example with no issues:"),
+        h4("An example with no issues (PMID: 25851385):"),
      div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_fine.jpg", height = 400, width = 500, style="left;")),
+     p("Here the trial CDF generally falls in the middle of the simulations and is close to the mean CDF (blue line). The probability that the trial is under- or over-dispersed is 0.08, with a precision multiplier of 0.97 (close to 1)."),
      br(),   
      
-        h4("An example of an over-dispersed trial:"),
+        h4("An example of an over-dispersed trial (PMID: 30510801):"),
      div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_over.jpg", height = 400, width = 500, style="left;")),
-    br(),
+     p("This trial has only five summary statistics and two are large negative t-statistics so the trial CDF is relatively far to the left. The probability that the trial is under- or over-dispersed is 0.94, with a precision multiplier of 0.21 (much smaller than 1)."),
+     br(),
         
         
     p(tags$a(href='mailto:a.barnett@qut.edu.au', 'Email'), ' me (Adrian) if you find a bug or have any ideas for improvements.', sep='')

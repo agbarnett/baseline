@@ -2,6 +2,14 @@
 # functions for shiny app to test baseline tables
 # January 2025
 
+# from https://stackoverflow.com/questions/24129124/how-to-determine-if-a-character-vector-is-a-valid-numeric-or-integer-vector, used below
+can.be.numeric <- function(x) {
+  stopifnot(is.atomic(x) || is.list(x)) # check if x is a vector
+  numNAs <- sum(is.na(x))
+  numNAs_new <- suppressWarnings(sum(is.na(as.numeric(x))))
+  if(is.na(x)){numNAs_new = FALSE} # False if number is missing
+  return(numNAs_new == numNAs)
+}
 
 # read and process Excel file (version for multiple columns)
 # must keep row names
@@ -22,12 +30,15 @@ my_read_excel = function(input_file){
   row_cont = which(str_detect(string=raw$v1, pattern='Continuous variables'))[1]
   row_percent = which(str_detect(string=raw$v1, pattern='Numbers or percents'))[1]
   # check there's some continuous and percent data
-  if(str_detect(raw$v1[row_cont+2], 'Numbers or percents')){row_cont = NULL}
-  if(is.na(raw$v1[row_percent+2])){row_percent = NULL}
+  index = which(raw$v3=='Mean')[1]
+  any.cont = can.be.numeric(raw$v3[index+1]) # is the next cell after the Mean a number?
+  index = which(raw$v3=='N')[1]
+  any.percent = can.be.numeric(raw$v3[index+1]) # is the next cell after the Mean a number?
   
   # extract continuous summary stats
-  continuous = percent = NULL
-  if(!is.null(row_cont)){
+  continuous = percents = NULL
+  max.percent = 0
+  if(any.cont == TRUE){
     continuous = raw[(row_cont+2):(row_percent-1),] %>% # extract rows
       mutate_at(vars(!matches("^v1$")), as.numeric) %>% # change every variable but first column to a number 
       filter_all(all_vars(!is.na(.)))  # all data must be available
@@ -38,7 +49,7 @@ my_read_excel = function(input_file){
   }
   
   # extract percent summary stats
-  if(!is.null(row_percent)){
+  if(any.percent == TRUE){
     p_names = paste('v',2:((n_groups*2)+1), sep='') # need this because continuous variables above include more columns
     percents = raw[(row_percent+2):nrow(raw),] %>%
       mutate_at(vars(!matches("^v1$")), as.numeric) %>% # change every variable but first column to a number 
@@ -250,7 +261,7 @@ baseline_table = function(webpage, # paper tables in xml format
 {
   
   # maximum number of tables - probably no longer needed
-  max_table = length(webpage %>% xml_nodes("table-wrap"))
+  max_table = length(webpage %>% html_elements("table-wrap"))
   if(table_number > max_table){ # table likely in appendix or graphic
     to.return = list()
     to.return$reason = 'Table in appendix or table is graphic'
@@ -1237,73 +1248,79 @@ make_stats_for_bayes_model = function(indata){
   
   
   # a) continuous (including CIs which have been changed to mean (SD))
-  cstats = filter(bind_data,
-                  statistic %in% c('ci','continuous')) %>% # must have positive SD
-    group_by(pmcid, row, statistic) %>%
-    summarise(
-      # now summaries
-      size = sum(sample_size), # total sample size
-      mdiff = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'difference'),
-      sem = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'se'),
-      t = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 't'),
-      p = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'p'),
-      sem2 = sem^2) %>% # squared
-    filter(!is.na(mdiff),
-           !is.na(sem2)) %>%
-    ungroup() 
-  # add back statistics, used by bootstrap simulation
-  add_back1 = filter(bind_data, statistic %in% c('ci','continuous'),
-                     column == 1) %>%
-    rename('m1' = 'stat1',
-           'sd1' = 'stat2',
-           'n1' = 'sample_size') %>%
-    select(pmcid, row, m1, sd1, n1)
-  add_back2 = filter(bind_data, statistic %in% c('ci','continuous'),
-                     column == 2) %>%
-    rename('m2' = 'stat1',
-           'sd2' = 'stat2',
-           'n2' = 'sample_size') %>%
-    select(pmcid, row, m2, sd2, n2)
-  cstats = full_join(full_join(cstats, add_back1, by=c('pmcid','row')),
-                     add_back2, by=c('pmcid','row')) 
+  cstats = NULL
+  if(any(indata$statistic == 'continuous')){
+    
+    cstats = filter(bind_data,
+                    statistic %in% c('ci','continuous')) %>% # must have positive SD
+      group_by(pmcid, row, statistic) %>%
+      summarise(
+        # now summaries
+        size = sum(sample_size), # total sample size
+        mdiff = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'difference'),
+        sem = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'se'),
+        t = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 't'),
+        p = t.test2(mean=stat1, sd=stat2, n=sample_size, return_what = 'p'),
+        sem2 = sem^2) %>% # squared
+      filter(!is.na(mdiff),
+             !is.na(sem2)) %>%
+      ungroup() 
+    # add back statistics, used by bootstrap simulation
+    add_back1 = filter(bind_data, statistic %in% c('ci','continuous'),
+                       column == 1) %>%
+      rename('m1' = 'stat1',
+             'sd1' = 'stat2',
+             'n1' = 'sample_size') %>%
+      select(pmcid, row, m1, sd1, n1)
+    add_back2 = filter(bind_data, statistic %in% c('ci','continuous'),
+                       column == 2) %>%
+      rename('m2' = 'stat1',
+             'sd2' = 'stat2',
+             'n2' = 'sample_size') %>%
+      select(pmcid, row, m2, sd2, n2)
+    cstats = full_join(full_join(cstats, add_back1, by=c('pmcid','row')),
+                       add_back2, by=c('pmcid','row')) 
+  }
   
   # percentages
   pstats = NULL
-  if(any(bind_data$statistic %in% c('percent','numbers')) == TRUE){ # needed because simulations may have no percents
-    pstats = filter(bind_data,
-                    statistic %in% c('percent','numbers')) %>%
-      group_by(pmcid, row, statistic) %>%
-      pivot_wider(id_cols=c(pmcid,statistic,row), names_from='column', values_from=c('stat1','sample_size'))  %>%
-      mutate(a = stat1_1, # successes
-             b = stat1_2,
-             c = sample_size_1 - stat1_1, # failures
-             d = sample_size_2 - stat1_2) %>%
-      filter(a>=0, b>=0, c>=0, d>=0) %>%
-      summarise(
-        size = sample_size_1 + sample_size_2, # total sample size
-        mdiff = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'difference'),
-        sem = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'se'),
-        t = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 't'),
-        p = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'p'),
-        sem2 = sem^2) %>% # squared
-      filter(!is.na(mdiff),
-             !is.na(sem2),
-             sem2 > 0) %>%
-      ungroup() 
+  if(any(indata$statistic == 'percent')){
+    if(any(bind_data$statistic %in% c('percent','numbers')) == TRUE){ # needed because simulations may have no percents
+      pstats = filter(bind_data,
+                      statistic %in% c('percent','numbers')) %>%
+        group_by(pmcid, row, statistic) %>%
+        pivot_wider(id_cols=c(pmcid,statistic,row), names_from='column', values_from=c('stat1','sample_size'))  %>%
+        mutate(a = stat1_1, # successes
+               b = stat1_2,
+               c = sample_size_1 - stat1_1, # failures
+               d = sample_size_2 - stat1_2) %>%
+        filter(a>=0, b>=0, c>=0, d>=0) %>%
+        summarise(
+          size = sample_size_1 + sample_size_2, # total sample size
+          mdiff = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'difference'),
+          sem = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'se'),
+          t = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 't'),
+          p = t.test2.binomial(a=a, b=b, c=c, d=d, return_what = 'p'),
+          sem2 = sem^2) %>% # squared
+        filter(!is.na(mdiff),
+               !is.na(sem2),
+               sem2 > 0) %>%
+        ungroup() 
+    }
+    # add back statistics, used by bootstrap simulation
+    add_back1 = filter(bind_data, statistic %in% c('percent','numbers'),
+                       column == 1) %>%
+      rename('n1' = 'stat1',
+             'N1' = 'sample_size') %>%
+      select(pmcid, row, n1, N1)
+    add_back2 = filter(bind_data, statistic %in% c('percent','numbers'),
+                       column == 2) %>%
+      rename('n2' = 'stat1',
+             'N2' = 'sample_size') %>%
+      select(pmcid, row, n2, N2)
+    pstats = full_join(full_join(pstats, add_back1, by=c('pmcid','row')),
+                       add_back2, by=c('pmcid','row')) 
   }
-  # add back statistics, used by bootstrap simulation
-  add_back1 = filter(bind_data, statistic %in% c('percent','numbers'),
-                     column == 1) %>%
-    rename('n1' = 'stat1',
-           'N1' = 'sample_size') %>%
-    select(pmcid, row, n1, N1)
-  add_back2 = filter(bind_data, statistic %in% c('percent','numbers'),
-                     column == 2) %>%
-    rename('n2' = 'stat1',
-           'N2' = 'sample_size') %>%
-    select(pmcid, row, n2, N2)
-  pstats = full_join(full_join(pstats, add_back1, by=c('pmcid','row')),
-                     add_back2, by=c('pmcid','row')) 
   
   # combine continuous and percents
   stats = bind_rows(cstats, pstats) %>%

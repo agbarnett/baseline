@@ -1,6 +1,6 @@
 # server.R
 # Shiny app to run checks of baseline tables for trials
-# January 2022
+# January 2022, updated February 2025
 
 shinyServer(function(input, output) {
   
@@ -13,10 +13,9 @@ shinyServer(function(input, output) {
     inPMCID <- input$pmcid
     inFile <- input$excel.file
     
-    #req(input$excel.file | input$pmcid | file.exists(input$excel.file$datapath))
-    
+    # is it Excel or PMID
     if (is.null(inFile)==TRUE & inPMCID==''){return(NULL)} # stop here if no file or PMCID
-    if (is.null(inFile)==FALSE & inPMCID==''){
+    if (is.null(inFile)==FALSE & inPMCID==''){ # Excel
       # progress message & get data
       withProgress(message = 'Processing the data from Excel',
                    value = 0,{
@@ -25,8 +24,8 @@ shinyServer(function(input, output) {
                      incProgress(1)
                    })
       
-      data$original_table = NULL # to match previous structure
-
+      data$original_table = NULL # to match structure for PMC version
+      
     }
     if (inPMCID!='' & is.null(inFile)==TRUE){ # get data from PMCID
       
@@ -80,7 +79,7 @@ shinyServer(function(input, output) {
         }
         tstats.sim = bind_rows(tstats.c, tstats.p) %>%
           mutate(pmcid = tstats$pmcid[1], # copy PMCID number
-                 study = k+1) # dummy study number
+                 study = k+1) # dummy study number for plotting
         all_stats = bind_rows(all_stats, tstats.sim) # add to overall data
       }
       
@@ -253,7 +252,7 @@ shinyServer(function(input, output) {
   )
   
   
-  # draw the histogram of t-statistics
+  ## plot the cumulative density or histogram of t-statistics ##
   output$distPlot <- renderPlot({
     
     inPMCID <- input$pmcid
@@ -261,49 +260,91 @@ shinyServer(function(input, output) {
     if (is.null(inFile)==TRUE & inPMCID=='' | is.null(tstats()$tstats)){tplot = NULL} # stop here if no file
     if (is.null(inFile)==FALSE | inPMCID!='' & !is.null(tstats()$tstats)){ # must be some t-statistics
       n.sims = input$n.sims
+      style <- input$graph.style
+      
       ## draw the summary of the t-statistics ##
       
-      ## create the median as a summary ##
-      # create all CDFs
-      average = filter(tstats()$tstats, study > 1) %>% # just simulations
-        group_by(study) %>%
-        mutate(cdf = ecdf(t)(t)) %>% # CDF per study
-        ungroup() 
-      # now calculate median CDF
-      cdf_median = group_by(average, study) %>%
-        arrange(study, t) %>%
-        mutate(r = rank(t, ties.method = 'first')) %>%
-        group_by(r) %>%
-        summarise(mid = median(t)) %>%
-        ungroup() %>%
-        mutate(e = r/n(),
-               study = 1) # had to provide study number
-      # add first point of the CDF
-      cdf_first = filter(cdf_median, r==1) %>%
-        mutate(e = 0, r=0)
-      cdf_median = bind_rows(cdf_first, cdf_median)
+      if(style == 'histogram'){
+        
+        #
+        tstats = tstats()$tstats
+        df = tstats$size[1]-2 # degrees of freedom for t-distribution
+        study_only = filter(tstats, study == 1)
+        
+        # define a minimum range for the x-axis
+        xlimits = rep(0,2)
+        xlimits[1] = min(c(-2, min(tstats$t)))
+        xlimits[2] = max(c(2, max(tstats$t)))
+        
+        # plot
+        tplot = ggplot(data=study_only, aes(x = t)) +
+          geom_histogram(aes(y=..density..), fill='grey44')+ # observed data
+#          geom_density(col='grey44')+ # alternative
+          geom_function(fun = dt, args = list(df=10), colour='blue')+ # smooth density with zero mean
+          xlab('t-statistic')+
+          ylab('Probability density function')+
+          scale_x_continuous(limits = xlimits)+
+          theme_bw()+
+          theme(text = element_text(size=14),
+                panel.grid.minor = element_blank())
+      }
       
-      # set up different colour and size for trial; move trial to last
-      tstats = mutate(tstats()$tstats, study = ifelse(study==1, 999, study))
-      colours = grey(runif(n = n.sims + 2, min=0.5, max=0.9)) # grey colours for simulations
-      colours[1] = 'dodgerblue' # colour for median
-      colours[n.sims + 2] = 'indianred1' # colour for trial
-      sizes = rep(1, n.sims + 2)
-      sizes[c(1,n.sims + 2)] = 2 # median and trial are larger
-      # plot
-      tplot = ggplot(data=tstats, aes(x=t, linewidth=1, colour=factor(study))) +
-        theme_bw()+
-#        scale_size_manual(values = sizes)+ # kept all lines the same size
-        scale_color_manual(values = colours)+
-        stat_ecdf()+
-        geom_step(data=cdf_median, aes(x=mid, y=e))+ # median CDF
-        xlab('t-statistic')+
-        ylab('Cumulative density')+
-        theme(text = element_text(size=14),
-              legend.position = 'none',
-              panel.grid.minor = element_blank())
-    }
+      if(style == 'cumulative'){  
+        
+        ## create the mean as a summary ##
+        # create all CDFs for all simulations
+        all_cdfs = filter(tstats()$tstats, study > 1) %>% # just simulations
+          group_by(study) %>%
+          mutate(cdf = ecdf(t)(t)) %>% # CDF per study
+          ungroup() 
+        # now calculate mean CDF
+        cdf_mean = group_by(all_cdfs, cdf) %>%
+          summarise(t = mean(t)) %>%
+          ungroup() %>%
+          mutate(study = 1) # had to provide study number, same as study 1 to get linewidth
+        # add first point of the CDF (where it hits the y-axis)
+        cdf_first = cdf_mean[1,] %>% 
+          mutate(cdf = 0)
+        cdf_mean = bind_rows(cdf_first, cdf_mean)
+        
+        # set up different colour and size for trial; move trial to last
+        tstats = mutate(tstats()$tstats, study = ifelse(study==1, 999, study))
+        colours = grey(runif(n = n.sims + 1, min=0.5, max=0.9)) # grey colours for simulations
+        colours[n.sims + 1] = 'indianred1' # colour for trial
+        sizes = rep(0.5, n.sims + 1) # thin lines
+        sizes[n.sims + 1] = 1 # mean and trial are larger
+        # plot
+        tplot = ggplot(data=tstats, aes(x=t, linewidth=factor(study, ordered = TRUE), colour=factor(study, ordered = TRUE))) +
+          stat_ecdf()+
+          scale_linewidth_manual(values = sizes)+
+          scale_color_manual(values = colours)+
+          geom_step(data=cdf_mean, aes(x=t, y=cdf), linewidth=1, col='dodgerblue')+ # mean CDF
+          xlab('t-statistic')+
+          ylab('Cumulative density')+
+          theme_bw()+
+          theme(text = element_text(size=14),
+                legend.position = 'none',
+                panel.grid.minor = element_blank(),
+                panel.grid.major = element_line(colour="lightcyan")) # to avoid clash with grey of simulations
+      } # end of style if
+    } 
+    
     tplot
   })
+  
+  ## which text to use for plot
+  output$whichPlot <- renderText({
+    if(input$graph.style=='cumulative'){text = "The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. The mean of the simulations is in blue."}
+    if(input$graph.style=='histogram'){text = 'The observed histogram and the expected probability density for a t-distribution.'}
+    text
+  })
+  
+  ## which title to use for plot
+  output$whichPlotTitle <- renderText({
+    if(input$graph.style=='cumulative'){title = "Cumulative density functions (CDFs)."}
+    if(input$graph.style=='histogram'){title = 'Histogram and probability density function (PDF).'}
+    title
+  })
+  
 }
 )
