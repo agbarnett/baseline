@@ -4,10 +4,10 @@ username: aimos
 account: aimos
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 13753563
-bundleId: 9667127
+appId: 13963493
+bundleId:
 url: https://aimos.shinyapps.io/baseline/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: bugs_model.txt|dumped.R|example_results_fine.RData|example_results_over.RData|excel_template.xlsx|notes.txt|README.md|example_data
+ignoredFiles: 1_run_examples.R|bugs_model.txt|dumped.R|example_fine.jpg|example_over.jpg|example_results_fine.RData|example_results_over.RData|example_under.jpg|excel_template.xlsx|LICENSE.md|notes.txt|README.md

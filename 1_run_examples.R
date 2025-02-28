@@ -5,8 +5,8 @@ source('global.R')
 
 # 1) get the data, depending on the type
 type = 'under'
-type = 'over'
 type = 'okay'
+type = 'over'
 
 #
 if(type == 'under_not_used'){
@@ -68,15 +68,23 @@ all_cdfs = filter(all_stats, study > 1) %>% # just simulations
   mutate(cdf = ecdf(t)(t)) %>% # CDF per study
   ungroup() %>%
   select(study, t, cdf)
+# smooth cdf based on ideal t-distribution using simulations
+ts = filter(all_stats, study > 1) %>% pull(t) # just use simulated t-values 
+cdf_smooth = data.frame(t = ts) %>%
+  arrange(t) %>%
+  mutate(cdf = pt(t, df = df, lower.tail=TRUE),
+         study = 1) 
 # now calculate mean CDF
-cdf_mean = group_by(all_cdfs, cdf) %>%
-  summarise(t = mean(t)) %>%
-  ungroup() %>%
-  mutate(study = 1) # had to provide study number, can be anything
+#cdf_mean = group_by(all_cdfs, cdf) %>%
+#  summarise(t = mean(t)) %>%
+#  ungroup() %>%
+#  mutate(study = 1) # had to provide study number, can be anything
 # add first point of the CDF (where it hits the y-axis)
-cdf_first = cdf_mean[1,] %>% 
+cdf_first = cdf_smooth[1,] %>% 
   mutate(cdf = 0)
-cdf_mean = bind_rows(cdf_first, cdf_mean)
+cdf_last = cdf_smooth[nrow(cdf_smooth),] %>% 
+  mutate(cdf = 1)
+cdf_smooth = bind_rows(cdf_first, cdf_smooth, cdf_last)
 
 # move trial line to last
 all_stats = mutate(all_stats, study = ifelse(study==1, 999, study))
@@ -90,7 +98,7 @@ tplot = ggplot(data=all_stats, aes(x=t, linewidth=factor(study,ordered = TRUE), 
   scale_linewidth_manual(values = sizes)+
   scale_color_manual(values = colours)+
   stat_ecdf()+
-  geom_step(data=cdf_mean, aes(x=t, y=cdf), linewidth=1,col='dodgerblue')+ # simulation average CDF
+  geom_step(data=cdf_smooth, aes(x=t, y=cdf), linewidth=1,col='dodgerblue')+ # simulation average CDF
   xlab('t-statistic')+
   ylab('Cumulative density')+
   theme(legend.position = 'none',

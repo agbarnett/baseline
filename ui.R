@@ -25,7 +25,7 @@ shinyUI(fluidPage(
                       value = '',
                       label = "Option 1: Enter PMCID",
 					  placeholder = 'PMCxxxxxxx'),
-			h5('example: PMC5640030',style="display:inline-block"), # add example
+			h5('example: PMC5640030', style="display:inline-block"), # add example
 
             # Input: Select a file ----
             fileInput(inputId ="excel.file", 
@@ -47,7 +47,7 @@ shinyUI(fluidPage(
                       label = "Number of simulations",
                       value = 20,
                       min = 1,
-                      max = 200),
+                      max = 100),
       			
 			      # choice of output, histogram or cumulative density
       			selectInput(inputId = "graph.style", 
@@ -84,7 +84,7 @@ shinyUI(fluidPage(
         
       # examples from 1_run_example.R
       h3("Some notes on the plots"),
-      p("The plots are designed to help interpret the results of the Bayesian model."),
+      p("The plots are designed to help interpret the Bayesian model results."),
       h4("An example of an under-dispersed trial that has been retracted for data fabrication (PMID: 9366938, first two columns of baseline table):"),
         div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_under.jpg", height = 400, width = 500, style="left;")),
       p("Here the trial CDF (red line) is too thin with a sharp change in the cumulative distribution because too many t-statistics are close to zero. The probability that the trial is under- or over-dispersed is 0.99, with a precision multiplier of 8.6 (much larger than 1)."),
@@ -92,7 +92,7 @@ shinyUI(fluidPage(
         
         h4("An example with no issues (PMID: 25851385):"),
      div(style="display:inline-block;",img(src="https://raw.githubusercontent.com/agbarnett/baseline/master/example_fine.jpg", height = 400, width = 500, style="left;")),
-     p("Here the trial CDF generally falls in the middle of the simulations and is close to the mean CDF (blue line). The probability that the trial is under- or over-dispersed is 0.08, with a precision multiplier of 0.97 (close to 1)."),
+     p("Here the trial CDF generally falls in the middle of the simulations and is close to the ideal CDF (blue line). The probability that the trial is under- or over-dispersed is 0.08, with a precision multiplier of 0.97 (close to 1)."),
      br(),   
      
         h4("An example of an over-dispersed trial (PMID: 30510801):"),

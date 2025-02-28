@@ -56,9 +56,11 @@ shinyServer(function(input, output) {
       n_removed = nrow(to_remove)
       if(n_removed > 0){
         # remove from stats
-        tstats = filter(tstats, !row %in% to_remove$row)
+        tstats = filter(tstats, !row %in% to_remove$row) %>%
+          mutate(row = as.numeric(as.factor(row))) # update row number
         # remove from data
         data$data = filter(data$data, !(statistic=='percent' & row %in% to_remove$row))
+        data$data = mutate(data$data, row = as.numeric(as.factor(row))) # re-number rows
       }
       
       # make simulated data from summary statistics
@@ -261,14 +263,14 @@ shinyServer(function(input, output) {
     if (is.null(inFile)==FALSE | inPMCID!='' & !is.null(tstats()$tstats)){ # must be some t-statistics
       n.sims = input$n.sims
       style <- input$graph.style
+      tstats = tstats()$tstats
+      df = tstats$size[1]-2 # degrees of freedom for t-distribution
       
       ## draw the summary of the t-statistics ##
       
       if(style == 'histogram'){
         
         #
-        tstats = tstats()$tstats
-        df = tstats$size[1]-2 # degrees of freedom for t-distribution
         study_only = filter(tstats, study == 1)
         
         # define a minimum range for the x-axis
@@ -291,24 +293,34 @@ shinyServer(function(input, output) {
       
       if(style == 'cumulative'){  
         
+        ## STUCK HERE, WHAT IS GOING ON WITH CDF IN WRONG DIRECTION!
+        
         ## create the mean as a summary ##
         # create all CDFs for all simulations
-        all_cdfs = filter(tstats()$tstats, study > 1) %>% # just simulations
+        all_cdfs = filter(tstats, study > 1) %>% # just simulations
           group_by(study) %>%
           mutate(cdf = ecdf(t)(t)) %>% # CDF per study
           ungroup() 
-        # now calculate mean CDF
-        cdf_mean = group_by(all_cdfs, cdf) %>%
-          summarise(t = mean(t)) %>%
-          ungroup() %>%
-          mutate(study = 1) # had to provide study number, same as study 1 to get linewidth
+        # smooth cdf based on ideal t-distribution
+        ts = filter(all_stats, study > 1) %>% pull(t) # just use simulated t-values 
+        cdf_smooth = data.frame(t = ts) %>%
+          arrange(t) %>%
+          mutate(cdf = pt(t, df = df, lower.tail=TRUE)) 
+        
+        # now calculate mean CDF of simulations - is not always monotonically increasing
+        #cdf_mean = group_by(all_cdfs, cdf) %>%
+        #  summarise(t = mean(t)) %>%
+        #  ungroup() %>%
+        #  mutate(study = 1) # had to provide study number, same as study 1 to get linewidth
         # add first point of the CDF (where it hits the y-axis)
-        cdf_first = cdf_mean[1,] %>% 
+        cdf_first = cdf_smooth[1,] %>% 
           mutate(cdf = 0)
-        cdf_mean = bind_rows(cdf_first, cdf_mean)
+        cdf_last = cdf_smooth[nrow(cdf_smooth),] %>% 
+          mutate(cdf = 1)
+        cdf_smooth = bind_rows(cdf_first, cdf_smooth, cdf_last)
         
         # set up different colour and size for trial; move trial to last
-        tstats = mutate(tstats()$tstats, study = ifelse(study==1, 999, study))
+        tstats = mutate(tstats, study = ifelse(study==1, 999, study))
         colours = grey(runif(n = n.sims + 1, min=0.5, max=0.9)) # grey colours for simulations
         colours[n.sims + 1] = 'indianred1' # colour for trial
         sizes = rep(0.5, n.sims + 1) # thin lines
@@ -318,7 +330,7 @@ shinyServer(function(input, output) {
           stat_ecdf()+
           scale_linewidth_manual(values = sizes)+
           scale_color_manual(values = colours)+
-          geom_step(data=cdf_mean, aes(x=t, y=cdf), linewidth=1, col='dodgerblue')+ # mean CDF
+          geom_step(data = cdf_smooth, aes(x=t, y=cdf), linewidth=1, col='dodgerblue')+ # mean CDF
           xlab('t-statistic')+
           ylab('Cumulative density')+
           theme_bw()+
@@ -334,7 +346,7 @@ shinyServer(function(input, output) {
   
   ## which text to use for plot
   output$whichPlot <- renderText({
-    if(input$graph.style=='cumulative'){text = "The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. The mean of the simulations is in blue."}
+    if(input$graph.style=='cumulative'){text = "The trial CDF is in red and the simulated trial CDFs in grey. The simulated trials are generated following the null hypothesis of no dispersion. An ideal distribution is in blue."}
     if(input$graph.style=='histogram'){text = 'The observed histogram and the expected probability density for a t-distribution.'}
     text
   })

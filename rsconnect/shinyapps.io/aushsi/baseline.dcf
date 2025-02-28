@@ -1,14 +1,13 @@
 name: baseline
 title: baseline
-username:
+username: aushsi
 account: aushsi
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 5392037
-bundleId: 8434271
+appId: 13972053
+bundleId: 9784476
 url: https://aushsi.shinyapps.io/baseline/
-when: 1711765724.32216
-lastSyncTime: 1711765724.32217
+version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: bugs_model.txt|example_results_fine.RData|example_results_over.RData|excel_template.xlsx|README.md
+ignoredFiles: 1_run_examples.R|bugs_model.txt|dumped.R|example_fine.jpg|example_over.jpg|example_results_fine.RData|example_results_over.RData|example_under.jpg|excel_template.xlsx|LICENSE.md|notes.txt|README.md|example_data
