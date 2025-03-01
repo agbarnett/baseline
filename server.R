@@ -302,7 +302,7 @@ shinyServer(function(input, output) {
           mutate(cdf = ecdf(t)(t)) %>% # CDF per study
           ungroup() 
         # smooth cdf based on ideal t-distribution
-        ts = filter(all_stats, study > 1) %>% pull(t) # just use simulated t-values 
+        ts = filter(tstats, study > 1) %>% pull(t) # just use simulated t-values 
         cdf_smooth = data.frame(t = ts) %>%
           arrange(t) %>%
           mutate(cdf = pt(t, df = df, lower.tail=TRUE)) 
