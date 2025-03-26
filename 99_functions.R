@@ -97,13 +97,14 @@ my_read_excel = function(input_file){
     continuous_long = full_join(ccol1, full_join(ccol2, ccol3, by=c('v1','row','column')), by=c('v1','row','column')) %>%
       mutate(row = row + max.percent, # add to make sure rows do not clash with percents
              statistic = 'continuous')
+    # warnings
+    if(any(ccol3$stat2<=0)){warning = paste(warning, 'Negative or zero standard deviations.\n', sep='')}
   }
   
   # concatenate
   long = bind_rows(percents_long, continuous_long) %>%
     mutate(pmcid = 99) # dummy for later function
   # warnings
-  if(any(ccol3$stat2<=0)){warning = paste(warning, 'Negative or zero standard deviations.\n', sep='')}
   if(any(long$sample_size - round(long$sample_size) !=0)){warning = cat(warning, 'Non-integer sample sizes.\n')}
   
   # return
