@@ -5,9 +5,9 @@ account: aushsi
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13972053
-bundleId: 10005408
+bundleId: 10017869
 url: https://aushsi.shinyapps.io/baseline/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: 1_run_examples.R|bugs_model.txt|dumped.R|example_fine.jpg|example_over.jpg|example_results_fine.RData|example_results_over.RData|example_under.jpg|excel_template.xlsx|LICENSE.md|notes.txt|README.md
+ignoredFiles: bugs_model.txt|dumped.R|example_fine.jpg|example_over.jpg|example_results_fine.RData|example_results_over.RData|example_under.jpg|excel_template.xlsx|LICENSE.md|notes.txt|README.md|example_data
