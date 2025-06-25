@@ -18,7 +18,7 @@ my_read_excel = function(input_file){
   
   # read in the file and assign dummy names (two groups only so far)
   raw = read_excel(path = input_file, sheet=1, col_names = FALSE, skip=2)
-  names(raw)[1:7] = paste('v', 1:7, sep='') # just first seven columns
+  names(raw)[1:13] = paste('v', 1:13, sep='') # just first thirteen columns (up to four groups)
   # calculate the number of groups
   index = which(raw$v1 == 'Name') # find name columns
   g1 = sum(raw[index[1],] == 'Mean', na.rm = TRUE)
